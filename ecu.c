@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     }
 
     if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-    {// 소켓 생성
+    {   // 소켓 생성
         printf("Server : Can't open stream socket\n");
         exit(0);
     }
@@ -40,13 +40,13 @@ int main(int argc, char *argv[])
     //server_addr 셋팅
 
     if(bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) <0)
-    {//bind() 호출
+    {   //bind() 호출
         printf("Server : Can't bind local address.\n");
         exit(0);
     }
 
     if(listen(server_fd, 5) < 0)
-    {//소켓을 수동 대기모드로 설정
+    {   //소켓을 수동 대기모드로 설정
         printf("Server : Can't listening connect.\n");
         exit(0);
     }
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
         //msg_size = read(client_fd, buffer, 1024);
         recv(client_fd, (struct DataContainer *) &data_con, sizeof(data_con), 0);
         printf("%d",data_con.seatbeltOn);
-        testPrintData();
+        printDataLog();
         // Controller로부터 버퍼에 메세지 받아옴
 
         //write(client_fd, buffer, msg_size);
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void testPrintData(){
+void printDataLog(){
   char* sig[2] = {"off", "on"};
   char* gr[4] = {"P", "R", "N", "D"};
 
