@@ -247,11 +247,8 @@ Makefile: ../cluster_ui/cluster_ui.pro ../../qt5.12.4/5.12.4/mingw73_32/mkspecs/
 		../../qt5.12.4/5.12.4/mingw73_32/mkspecs/features/yacc.prf \
 		../../qt5.12.4/5.12.4/mingw73_32/mkspecs/features/lex.prf \
 		../cluster_ui/cluster_ui.pro \
-		../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5QuickWidgets.prl \
-		../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Quick.prl \
 		../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Widgets.prl \
 		../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Gui.prl \
-		../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Qml.prl \
 		../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Network.prl \
 		../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Core.prl \
 		../../qt5.12.4/5.12.4/mingw73_32/lib/qtmain.prl
@@ -440,11 +437,8 @@ Makefile: ../cluster_ui/cluster_ui.pro ../../qt5.12.4/5.12.4/mingw73_32/mkspecs/
 ../../qt5.12.4/5.12.4/mingw73_32/mkspecs/features/yacc.prf:
 ../../qt5.12.4/5.12.4/mingw73_32/mkspecs/features/lex.prf:
 ../cluster_ui/cluster_ui.pro:
-../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5QuickWidgets.prl:
-../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Quick.prl:
 ../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Widgets.prl:
 ../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Gui.prl:
-../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Qml.prl:
 ../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Network.prl:
 ../../qt5.12.4/5.12.4/mingw73_32/lib/Qt5Core.prl:
 ../../qt5.12.4/5.12.4/mingw73_32/lib/qtmain.prl:

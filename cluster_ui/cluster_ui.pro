@@ -1,10 +1,10 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2019-08-27T16:34:33
+# Project created by QtCreator 2019-08-28T09:20:51
 #
 #-------------------------------------------------
 
-QT       += core gui network quickwidgets
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,16 +25,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        Cluster_UI.cpp \
         main.cpp \
-        Main_UI.cpp
+        Cluster_UI.cpp
 
 HEADERS += \
-        cluster_ui.h \
-        main_ui.h
+        cluster_ui.h
 
 FORMS += \
-        main_ui.ui
+        cluster_ui.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -42,10 +40,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    qml_resources.qrc
-
-DISTFILES += \
-    qml/GraphGauge.qml \
-    qml/RoundGauge.qml \
-    qml/main.qml \
-    qml/needle.png
+    images.qrc
