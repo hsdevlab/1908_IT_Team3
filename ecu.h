@@ -19,15 +19,15 @@ struct DataContainer{
 };
 
 struct EngineStatus{
-  int velocity; // 엔진 속도
-  int accel; // 가속도
-  double fuel; // 잔여 연료량
+  float velocity; // 엔진 속도
+  float accel; // 가속도
+  float fuel; // 잔여 연료량
 };
 
 struct TripInfo{
-  int mileage; // 총 주행 거리
+  float mileage; // 총 주행 거리
   int driveTime; // 총 주행 시간
   int fuelEconomy; // 차량 연비
   int instSpeed; // 순간 속도
-  int avgSpeed; // 평균 속도
+  float avgSpeed; // 평균 속도
 };
