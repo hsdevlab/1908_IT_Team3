@@ -1,0 +1,280 @@
+=== Trip Info ===
+2019/08/28 16:07:54
+Mileage : 0.0028 km
+Fuel Economy : 10
+Instantaneous Car Speed : 10 km/h
+Average Car Speed : 10.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:07:55
+Mileage : 0.0083 km
+Fuel Economy : 10
+Instantaneous Car Speed : 20 km/h
+Average Car Speed : 15.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:07:56
+Mileage : 0.0167 km
+Fuel Economy : 10
+Instantaneous Car Speed : 30 km/h
+Average Car Speed : 20.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:07:57
+Mileage : 0.0278 km
+Fuel Economy : 10
+Instantaneous Car Speed : 40 km/h
+Average Car Speed : 25.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:07:58
+Mileage : 0.0417 km
+Fuel Economy : 10
+Instantaneous Car Speed : 50 km/h
+Average Car Speed : 30.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:07:59
+Mileage : 0.0583 km
+Fuel Economy : 10
+Instantaneous Car Speed : 60 km/h
+Average Car Speed : 35.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:00
+Mileage : 0.0778 km
+Fuel Economy : 10
+Instantaneous Car Speed : 70 km/h
+Average Car Speed : 40.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:01
+Mileage : 0.1000 km
+Fuel Economy : 10
+Instantaneous Car Speed : 80 km/h
+Average Car Speed : 45.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:02
+Mileage : 0.1250 km
+Fuel Economy : 10
+Instantaneous Car Speed : 90 km/h
+Average Car Speed : 50.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:03
+Mileage : 0.1528 km
+Fuel Economy : 10
+Instantaneous Car Speed : 100 km/h
+Average Car Speed : 55.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:04
+Mileage : 0.1833 km
+Fuel Economy : 10
+Instantaneous Car Speed : 110 km/h
+Average Car Speed : 60.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:05
+Mileage : 0.2167 km
+Fuel Economy : 10
+Instantaneous Car Speed : 120 km/h
+Average Car Speed : 65.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:06
+Mileage : 0.2528 km
+Fuel Economy : 10
+Instantaneous Car Speed : 130 km/h
+Average Car Speed : 70.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:07
+Mileage : 0.2917 km
+Fuel Economy : 10
+Instantaneous Car Speed : 140 km/h
+Average Car Speed : 75.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:08
+Mileage : 0.3333 km
+Fuel Economy : 10
+Instantaneous Car Speed : 150 km/h
+Average Car Speed : 80.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:09
+Mileage : 0.3778 km
+Fuel Economy : 10
+Instantaneous Car Speed : 160 km/h
+Average Car Speed : 85.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:10
+Mileage : 0.4250 km
+Fuel Economy : 10
+Instantaneous Car Speed : 170 km/h
+Average Car Speed : 90.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:11
+Mileage : 0.4750 km
+Fuel Economy : 10
+Instantaneous Car Speed : 180 km/h
+Average Car Speed : 95.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:12
+Mileage : 0.5278 km
+Fuel Economy : 10
+Instantaneous Car Speed : 190 km/h
+Average Car Speed : 100.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:13
+Mileage : 0.5833 km
+Fuel Economy : 10
+Instantaneous Car Speed : 200 km/h
+Average Car Speed : 105.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:14
+Mileage : 0.6417 km
+Fuel Economy : 10
+Instantaneous Car Speed : 210 km/h
+Average Car Speed : 110.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:15
+Mileage : 0.7028 km
+Fuel Economy : 10
+Instantaneous Car Speed : 220 km/h
+Average Car Speed : 115.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:16
+Mileage : 0.7667 km
+Fuel Economy : 10
+Instantaneous Car Speed : 230 km/h
+Average Car Speed : 120.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:17
+Mileage : 0.8333 km
+Fuel Economy : 10
+Instantaneous Car Speed : 240 km/h
+Average Car Speed : 125.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:18
+Mileage : 0.9028 km
+Fuel Economy : 10
+Instantaneous Car Speed : 250 km/h
+Average Car Speed : 130.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:19
+Mileage : 0.9750 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 135.00 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:20
+Mileage : 1.0472 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 139.63 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:21
+Mileage : 1.1194 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 143.93 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:22
+Mileage : 1.1917 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 147.93 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:23
+Mileage : 1.2639 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 151.67 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:24
+Mileage : 1.3361 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 155.16 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:25
+Mileage : 1.4083 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 158.44 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:26
+Mileage : 1.4806 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 161.52 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:27
+Mileage : 1.5528 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 164.41 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:28
+Mileage : 1.6250 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 167.14 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:29
+Mileage : 1.6972 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 169.72 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:30
+Mileage : 1.7694 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 172.16 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:31
+Mileage : 1.8417 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 174.47 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:32
+Mileage : 1.9139 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 176.67 km/h
+
+=== Trip Info ===
+2019/08/28 16:08:33
+Mileage : 1.9861 km
+Fuel Economy : 10
+Instantaneous Car Speed : 260 km/h
+Average Car Speed : 178.75 km/h
+

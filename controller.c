@@ -44,7 +44,7 @@ void main(int argc, char *argv[])
     struct DataContainer dc;
     while(1)
     {
-      sleep(2);
+      sleep(1);
       printf("Send signal...\n");
       dc.turnSignal[0] = dc.turnSignal[1] = false;
       dc.doorOpen[0] = dc.doorOpen[1] = dc.doorOpen[2] = dc.doorOpen[3] = false;
