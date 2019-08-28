@@ -1,0 +1,32 @@
+=== Trip Info ===
+2019/08/28 10:59:59
+Mileage : 0
+Instantaneous Fuel Economy : 0
+Average Fuel Economy : 0
+Instantaneous Car Speed : 0
+Average Car Speed : 0
+
+=== Trip Info ===
+2019/08/28 11:00:01
+Mileage : 0
+Instantaneous Fuel Economy : 0
+Average Fuel Economy : 0
+Instantaneous Car Speed : 0
+Average Car Speed : 0
+
+=== Trip Info ===
+2019/08/28 11:00:03
+Mileage : 0
+Instantaneous Fuel Economy : 0
+Average Fuel Economy : 0
+Instantaneous Car Speed : 0
+Average Car Speed : 0
+
+=== Trip Info ===
+2019/08/28 11:00:05
+Mileage : 0
+Instantaneous Fuel Economy : 0
+Average Fuel Economy : 0
+Instantaneous Car Speed : 0
+Average Car Speed : 0
+

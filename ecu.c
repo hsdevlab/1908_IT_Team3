@@ -11,6 +11,9 @@
 
 struct DataContainer data_con; // Controller로부터 받아온 데이터 입력
 struct EngineStatus eng_stat; // ECU에서 계산된 엔진 상태정보
+struct TripInfo trip_info; // 차량 주행시 업데이트되는 주행정보(File로 작성)
+struct tm *date;
+FILE *log_file;
 
 int main(int argc, char *argv[])
 {
@@ -65,21 +68,53 @@ int main(int argc, char *argv[])
         inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, temp, sizeof(temp));
         printf("Server : %s client connected.\n", temp);
 
-        //msg_size = read(client_fd, buffer, 1024);
-        recv(client_fd, (struct DataContainer *) &data_con, sizeof(data_con), 0);
-        printf("%d",data_con.seatbeltOn);
-        printDataLog();
-        // Controller로부터 버퍼에 메세지 받아옴
+        initStatus();
+        log_file = fopen("log.txt","w");
+        if(log_file == NULL){
+            printf("Error : Can't open log file\n");
+            exit(0);
+        }
+        while(1)
+        {
+            // Controller로부터 메세지 받아옴
+            if(recv(client_fd, (struct DataContainer *) &data_con, sizeof(data_con), 0) <= 0) break;
+            printDataLog();
+            writeTripInfo();
+        }
 
-        //write(client_fd, buffer, msg_size);
         close(client_fd);
+        fclose(log_file);
         printf("Server : %s client closed.\n", temp);
     }
+
     close(server_fd);
     return 0;
 }
 
+void initStatus(){
+  // 차량상태 초기화
+  data_con.turnSignal[0] = data_con.turnSignal[1] = false;
+  data_con.doorOpen[0] = data_con.doorOpen[1] =data_con.doorOpen[2] = data_con.doorOpen[3] = false;
+  data_con.seatbeltOn = false;
+  data_con.accelator = 0;
+  data_con.brake = 0;
+  data_con.gear = P;
+
+  // 엔진상태 초기화
+  eng_stat.velocity = 0;
+  eng_stat.accel = 0;
+  eng_stat.fuel = 65; // 연료 초기값은 65L로 지정
+
+  // 주행정보 초기화
+  trip_info.mileage = 0;
+  trip_info.fuelEconomy = 10;
+  trip_info.instSpeed = 0;
+  trip_info.avgSpeed = 0;
+  trip_info.driveTime = 0;
+}
+
 void printDataLog(){
+  // 컨트롤러 데이터 로그 출력
   char* sig[2] = {"off", "on"};
   char* gr[4] = {"P", "R", "N", "D"};
 
@@ -90,5 +125,47 @@ void printDataLog(){
   printf("Seatbelt : %s\n", sig[data_con.seatbeltOn]);
   printf("Accelator : %d\n", data_con.accelator);
   printf("Brake : %d\n", data_con.brake);
-  printf("Gear : [%s]\n", gr[data_con.gear]);
+  printf("Gear : [%s]\n\n", gr[data_con.gear]);
+}
+
+void printEngStat(){
+  // 엔진상태 출력
+  printf("=== Engine Status ===\n");
+  printf("Velocity : %d\n", eng_stat.velocity);
+  printf("Accelation : %d\n", eng_stat.accel);
+  printf("Fuel Left : %.2f L\n\n", eng_stat.fuel);
+}
+
+void writeTripInfo(){
+  // 주행 정보 파일 작성
+  const time_t t = time(NULL);
+  date = localtime(&t);
+
+  fprintf(log_file, "=== Trip Info ===\n");
+  fprintf(log_file, "%d/%02d/%02d %02d:%02d:%02d\n", date->tm_year+1900, date->tm_mon+1, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
+  fprintf(log_file, "Mileage : %d\n", trip_info.mileage);
+  fprintf(log_file, "Fuel Economy : %d\n", trip_info.fuelEconomy);
+  fprintf(log_file, "Instantaneous Car Speed : %d\n", trip_info.instSpeed);
+  fprintf(log_file, "Average Car Speed : %d\n\n", trip_info.avgSpeed);
+  // TODO: File Write
+
+}
+
+void updateEngStat(){
+  // 엔진 상태 업데이트
+  if(data_con.accelator != 0 && data_con.brake != 0)
+    eng_stat.accel = 5 * (data_con.accelator - data_con.brake);
+  else
+    eng_stat.accel = -3;
+
+  eng_stat.velocity += eng_stat.accel;
+  eng_stat.fuel -= eng_stat.velocity / (3600 * trip_info.fuelEconomy);
+}
+
+void updateTripInfo(){
+  // 주행정보 업데이트
+  trip_info.mileage += (eng_stat.velocity / 3600);
+  trip_info.instSpeed = eng_stat.velocity;
+  trip_info.avgSpeed = trip_info.mileage / (trip_info.driveTime / 3600);
+  trip_info.driveTime++;
 }
