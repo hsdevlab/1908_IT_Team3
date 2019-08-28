@@ -134,8 +134,8 @@ void printDataLog(){
 void printEngStat(){
   // 엔진상태 출력
   printf("=== Engine Status ===\n");
-  printf("Velocity : %d\n", eng_stat.velocity);
-  printf("Accelation : %d\n", eng_stat.accel);
+  printf("Velocity : %.2f\n", eng_stat.velocity);
+  printf("Accelation : %.2f\n", eng_stat.accel);
   printf("Fuel Left : %.2f L\n\n", eng_stat.fuel);
 }
 
@@ -144,12 +144,18 @@ void writeTripInfo(){
   const time_t t = time(NULL);
   date = localtime(&t);
 
-  fprintf(log_file, "=== Trip Info ===\n");
-  fprintf(log_file, "%d/%02d/%02d %02d:%02d:%02d\n", date->tm_year+1900, date->tm_mon+1, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
-  fprintf(log_file, "Mileage : %.4f km\n", trip_info.mileage);
-  fprintf(log_file, "Fuel Economy : %d\n", trip_info.fuelEconomy);
-  fprintf(log_file, "Instantaneous Car Speed : %d km/h\n", trip_info.instSpeed);
-  fprintf(log_file, "Average Car Speed : %.2f km/h\n\n", trip_info.avgSpeed);
+  // fprintf(log_file, "=== Trip Info ===\n");
+  // fprintf(log_file, "%d/%02d/%02d %02d:%02d:%02d\n", date->tm_year+1900, date->tm_mon+1, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
+  // fprintf(log_file, "Mileage : %.4f km\n", trip_info.mileage);
+  // fprintf(log_file, "Fuel Economy : %d\n", trip_info.fuelEconomy);
+  // fprintf(log_file, "Instantaneous Car Speed : %d km/h\n", trip_info.instSpeed);
+  // fprintf(log_file, "Average Car Speed : %.2f km/h\n\n", trip_info.avgSpeed);
+
+  fprintf(log_file, "%d/%02d/%02d %02d:%02d:%02d", date->tm_year+1900, date->tm_mon+1, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
+  fprintf(log_file, "| Mileage:%.4fkm\t", trip_info.mileage);
+  fprintf(log_file, "| FuelEco:%d\t", trip_info.fuelEconomy);
+  fprintf(log_file, "| Speed:%dkm/h\t", trip_info.instSpeed);
+  fprintf(log_file, "| AverageSpeed:%.2fkm/h\n", trip_info.avgSpeed);
 }
 
 void updateEngStat(){
@@ -157,15 +163,15 @@ void updateEngStat(){
 
   /*
    * accelator : 0/1/2/3 , brake : 0/1/2/3
-   * 가속도 : (5 * 엑셀) - (5 * 브레이크)
+   * 가속도 : (0.25 * 엑셀) - (0.25 * 브레이크)
    * 속도 : 현재 속도 + 가속도
    * 엑셀과 브레이크가 모두 0일 경우, 속도는 매 초당 -3km/h로 감속
    * 최대속도(260km/h)에서 가속하거나 최저속도(0km/h)에서 감속할 경우 현상유지
    */
   if(data_con.accelator != 0 || data_con.brake != 0)
-    eng_stat.accel = 5 * (data_con.accelator - data_con.brake);
+    eng_stat.accel = 0.25 * (data_con.accelator - data_con.brake);
   else
-    eng_stat.accel = -5;
+    eng_stat.accel = -0.25;
 
   if(eng_stat.velocity + eng_stat.accel > 260) eng_stat.velocity = 260;
   else if(eng_stat.velocity + eng_stat.accel < 0) eng_stat.velocity = 0;
@@ -173,19 +179,19 @@ void updateEngStat(){
 
   /*
    * 연료 : 잔존 연료량  - 주행거리 / 연비
-   * 연비는 km/h로 계산되어 km/sec로 변환하기 위해 60 * 60으로 나눔
+   * 연비는 km/h로 계산되어 km/sec(1/20초)로 변환하기 위해 60 * 60 / 20으로 나눔
    */
   if(eng_stat.velocity == 0 || trip_info.fuelEconomy == 0) return;
-  if(eng_stat.fuel - (eng_stat.velocity / (3600 * trip_info.fuelEconomy)) < 0) {
+  if(eng_stat.fuel - 0.05 * (eng_stat.velocity / (float)(3600 * trip_info.fuelEconomy)) < 0) {
     eng_stat.fuel = 0;
     // TODO: 연료 소진 알람 및 속도 제어로직 추가하기
-  } else eng_stat.fuel -= (float)eng_stat.velocity / (float)(3600 * trip_info.fuelEconomy);
+  } else eng_stat.fuel -= 0.05 * (float)eng_stat.velocity / (float)(3600 * trip_info.fuelEconomy);
 }
 
 void updateTripInfo(){
   // 주행정보 업데이트
-  trip_info.mileage += ((float)eng_stat.velocity / (float)3600);
+  trip_info.mileage += 0.05 * ((float)eng_stat.velocity / (float)3600);
   trip_info.instSpeed = eng_stat.velocity;
   trip_info.driveTime++;
-  if(trip_info.driveTime != 0 && ((float)trip_info.driveTime / (float)3600) != 0.0) trip_info.avgSpeed = trip_info.mileage / ((float)trip_info.driveTime / (float)3600);
+  if(trip_info.driveTime != 0 && ((float)trip_info.driveTime / (float)180) != 0.0) trip_info.avgSpeed = trip_info.mileage / ((float)trip_info.driveTime / (float)72000);
 }

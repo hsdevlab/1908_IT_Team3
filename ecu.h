@@ -19,8 +19,8 @@ struct DataContainer{
 };
 
 struct EngineStatus{
-  int velocity; // 엔진 속도
-  int accel; // 가속도
+  float velocity; // 엔진 속도
+  float accel; // 가속도
   float fuel; // 잔여 연료량
 };
 
