@@ -78,7 +78,10 @@ int main(int argc, char *argv[])
         {
             // Controller로부터 메세지 받아옴
             if(recv(client_fd, (struct DataContainer *) &data_con, sizeof(data_con), 0) <= 0) break;
+            updateEngStat();
+            updateTripInfo();
             printDataLog();
+            printEngStat();
             writeTripInfo();
         }
 
@@ -125,7 +128,7 @@ void printDataLog(){
   printf("Seatbelt : %s\n", sig[data_con.seatbeltOn]);
   printf("Accelator : %d\n", data_con.accelator);
   printf("Brake : %d\n", data_con.brake);
-  printf("Gear : [%s]\n\n", gr[data_con.gear]);
+  printf("Gear : [%s]\n", gr[data_con.gear]);
 }
 
 void printEngStat(){
@@ -147,19 +150,36 @@ void writeTripInfo(){
   fprintf(log_file, "Fuel Economy : %d\n", trip_info.fuelEconomy);
   fprintf(log_file, "Instantaneous Car Speed : %d\n", trip_info.instSpeed);
   fprintf(log_file, "Average Car Speed : %d\n\n", trip_info.avgSpeed);
-  // TODO: File Write
-
 }
 
 void updateEngStat(){
   // 엔진 상태 업데이트
+
+  /*
+   * accelator : 0/1/2/3 , brake : 0/1/2/3
+   * 가속도 : (5 * 엑셀) - (5 * 브레이크)
+   * 속도 : 현재 속도 + 가속도
+   * 엑셀과 브레이크가 모두 0일 경우, 속도는 매 초당 -3km/h로 감속
+   * 최대속도(260km/h)에서 가속하거나 최저속도(0km/h)에서 감속할 경우 현상유지
+   */
   if(data_con.accelator != 0 && data_con.brake != 0)
     eng_stat.accel = 5 * (data_con.accelator - data_con.brake);
   else
     eng_stat.accel = -3;
 
-  eng_stat.velocity += eng_stat.accel;
-  eng_stat.fuel -= eng_stat.velocity / (3600 * trip_info.fuelEconomy);
+  if(eng_stat.velocity + eng_stat.accel > 260) eng_stat.velocity = 260;
+  else if(eng_stat.velocity + eng_stat.accel < 0) eng_stat.velocity = 0;
+  else eng_stat.velocity += eng_stat.accel;
+
+  /*
+   * 연료 : 잔존 연료량  - 주행거리 / 연비
+   * 연비는 km/h로 계산되어 km/sec로 변환하기 위해 60 * 60으로 나눔
+   */
+  if(eng_stat.velocity == 0 || trip_info.fuelEconomy == 0) return;
+  if(eng_stat.fuel - (eng_stat.velocity / (3600 * trip_info.fuelEconomy)) < 0) {
+    eng_stat.fuel = 0;
+    // TODO: 연료 소진 알람 및 속도 제어로직 추가하기
+  } else eng_stat.fuel -= eng_stat.velocity / (3600 * trip_info.fuelEconomy);
 }
 
 void updateTripInfo(){

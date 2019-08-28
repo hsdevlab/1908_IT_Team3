@@ -49,9 +49,9 @@ void main(int argc, char *argv[])
       dc.turnSignal[0] = dc.turnSignal[1] = false;
       dc.doorOpen[0] = dc.doorOpen[1] = dc.doorOpen[2] = dc.doorOpen[3] = false;
       dc.seatbeltOn = true;
-      dc.accelator = 0;
+      dc.accelator = 2;
       dc.brake = 0;
-      dc.gear = P;
+      dc.gear = D;
       send(server_fd,(struct DataContainer *) &dc, sizeof(dc), 0);
       // TODO: 컨트롤러단 주기적 신호 발생시키기
     }
