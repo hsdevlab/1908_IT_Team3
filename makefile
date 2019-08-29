@@ -8,10 +8,10 @@ CONT=controller
 all: $(ECU) $(CONT)
 
 ecu.o: ecu.c ecu.h
-	$(CC) -c ecu.c
+	$(CC) -c ecu.c -lm
 
 $(ECU):$(EOBJS)
-	$(CC) -o ecu ecu.o
+	$(CC) -o ecu ecu.o -lm
 
 controller.o: controller.c ecu.h
 	$(CC) -c controller.c

@@ -25,7 +25,7 @@ struct EngineStatus{
 };
 
 struct TripInfo{
-  float mileage; // 총 주행 거리
+  float mileage; // 주행 거리
   int driveTime; // 총 주행 시간
   int fuelEconomy; // 차량 연비
   int instSpeed; // 순간 속도
