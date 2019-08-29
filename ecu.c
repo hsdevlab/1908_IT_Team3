@@ -21,6 +21,8 @@ char buffer[BUF_LEN];
 char fval[BUF_LEN];
 FILE *log_file;
 
+int setFvalMem(float val, int idx);
+
 void *tServer(void *data)
 {
     // TODO
@@ -33,8 +35,9 @@ int main(int argc, char *argv[])
     int server_fd, client_fd; // 서버/클라이언트 소켓 번호
     int len, msg_size;
 
-		//float tmp = 99.00;
-		//setFvalMem(tmp);
+		// float tmp = 99;
+		// int i = 0;
+		// i = setFvalMem(tmp, i);
 
     if(argc != 2)
     {
@@ -92,10 +95,15 @@ int main(int argc, char *argv[])
 					// 해당 ip 클라이언트 진입
 					while(1)
 					{
-							memset(ecu_msg, 0x00, BUF_LEN);
+							memset(ecu_msg, 0x00, BUF_LEN+1);
+							eng_stat.velocity = 60;
+							data_con.turnSignal[0] = true;
+							data_con.doorOpen[0] = true;
+							data_con.gear = D;
 							setEcuMsg();
-							if(send(client_fd, ecu_msg, BUF_LEN, 0) <= 0) break;
-							printf("send...\n");
+							ecu_msg[BUF_LEN] = '\n';
+							if(send(client_fd, ecu_msg, BUF_LEN+1, 0) <= 0) break;
+							printf("send : %s\n", ecu_msg);
 					}
 				} else {
 					while(1)
@@ -133,14 +141,14 @@ int getStrSize(){
 	return i;
 }
 
-void setFvalMem(float val){
-	printf("%f", val);
-	// memset(fval, 0x00, BUF_LEN);
-	// sprintf(fval, "%f", eng_stat.velocity);
-	// int str_len = getStrSize();
-	// for(int i=0; i<str_len; i++){
-	// 	ecu_msg[idx++] = fval[i];
-	// }
+int setFvalMem(float val, int idx){
+	memset(fval, 0x00, BUF_LEN);
+	sprintf(fval, "%f", val);
+	int str_len = getStrSize();
+	for(int i=0; i<str_len; i++){
+		ecu_msg[idx++] = fval[i];
+	}
+	return idx;
 }
 
 void setEcuMsg(){
@@ -161,72 +169,80 @@ void setEcuMsg(){
 	ecu_msg[idx++] = data_con.brake + '0';
 	ecu_msg[idx++] = '|';
 	ecu_msg[idx++] = data_con.gear + '0';
-
-	memset(fval, 0x00, BUF_LEN);
-	sprintf(fval, "%f", eng_stat.velocity);
-	int str_len = getStrSize();
-	for(int i=0; i<str_len; i++){
-		ecu_msg[idx++] = fval[i];
-	}
 	ecu_msg[idx++] = '|';
 
-	memset(fval, 0x00, BUF_LEN);
-	sprintf(fval, "%f", eng_stat.accel);
-	str_len = getStrSize();
-	for(int i=0; i<str_len; i++){
-		ecu_msg[idx++] = fval[i];
-	}
+	// memset(fval, 0x00, BUF_LEN);
+	// sprintf(fval, "%f", eng_stat.velocity);
+	// int str_len = getStrSize();
+	// for(int i=0; i<str_len; i++){
+	// 	ecu_msg[idx++] = fval[i];
+	// }
+	idx = setFvalMem(eng_stat.velocity, idx);
 	ecu_msg[idx++] = '|';
 
-	memset(fval, 0x00, BUF_LEN);
-	sprintf(fval, "%f", eng_stat.fuel);
-	str_len = getStrSize();
-	for(int i=0; i<str_len; i++){
-		ecu_msg[idx++] = fval[i];
-	}
+	// memset(fval, 0x00, BUF_LEN);
+	// sprintf(fval, "%f", eng_stat.accel);
+	// str_len = getStrSize();
+	// for(int i=0; i<str_len; i++){
+	// 	ecu_msg[idx++] = fval[i];
+	// }
+	idx = setFvalMem(eng_stat.accel, idx);
 	ecu_msg[idx++] = '|';
 
-	memset(fval, 0x00, BUF_LEN);
-	sprintf(fval, "%f", trip_info.mileage);
-	str_len = getStrSize();
-	for(int i=0; i<str_len; i++){
-		ecu_msg[idx++] = fval[i];
-	}
+	// memset(fval, 0x00, BUF_LEN);
+	// sprintf(fval, "%f", eng_stat.fuel);
+	// str_len = getStrSize();
+	// for(int i=0; i<str_len; i++){
+	// 	ecu_msg[idx++] = fval[i];
+	// }
+	idx = setFvalMem(eng_stat.fuel, idx);
 	ecu_msg[idx++] = '|';
 
-	// int 길이 스트링에 세트
-	memset(fval, 0x00, BUF_LEN);
-	sprintf(fval, "%d", trip_info.driveTime);
-	str_len = getStrSize();
-	for(int i=0; i<str_len; i++){
-		ecu_msg[idx++] = fval[i];
-	}
+	// memset(fval, 0x00, BUF_LEN);
+	// sprintf(fval, "%f", trip_info.mileage);
+	// str_len = getStrSize();
+	// for(int i=0; i<str_len; i++){
+	// 	ecu_msg[idx++] = fval[i];
+	// }
+	idx = setFvalMem(trip_info.mileage, idx);
 	ecu_msg[idx++] = '|';
 
-	memset(fval, 0x00, BUF_LEN);
-	sprintf(fval, "%d", trip_info.fuelEconomy);
-	str_len = getStrSize();
-	for(int i=0; i<str_len; i++){
-		ecu_msg[idx++] = fval[i];
-	}
+	// memset(fval, 0x00, BUF_LEN);
+	// sprintf(fval, "%d", trip_info.driveTime);
+	// str_len = getStrSize();
+	// for(int i=0; i<str_len; i++){
+	// 	ecu_msg[idx++] = fval[i];
+	// }
+	idx = setFvalMem(trip_info.driveTime, idx);
 	ecu_msg[idx++] = '|';
 
-	memset(fval, 0x00, BUF_LEN);
-	sprintf(fval, "%d", trip_info.instSpeed);
-	str_len = getStrSize();
-	for(int i=0; i<str_len; i++){
-		ecu_msg[idx++] = fval[i];
-	}
+	// memset(fval, 0x00, BUF_LEN);
+	// sprintf(fval, "%d", trip_info.fuelEconomy);
+	// str_len = getStrSize();
+	// for(int i=0; i<str_len; i++){
+	// 	ecu_msg[idx++] = fval[i];
+	// }
+	idx = setFvalMem(trip_info.fuelEconomy, idx);
 	ecu_msg[idx++] = '|';
 
-	memset(fval, 0x00, BUF_LEN);
-	sprintf(fval, "%f", trip_info.avgSpeed);
-	str_len = getStrSize();
-	for(int i=0; i<str_len; i++){
-		ecu_msg[idx++] = fval[i];
-	}
-	ecu_msg[idx++] = '\n';
-	printf("%s\n", ecu_msg);
+	// memset(fval, 0x00, BUF_LEN);
+	// sprintf(fval, "%d", trip_info.instSpeed);
+	// str_len = getStrSize();
+	// for(int i=0; i<str_len; i++){
+	// 	ecu_msg[idx++] = fval[i];
+	// }
+	idx = setFvalMem(trip_info.instSpeed, idx);
+	ecu_msg[idx++] = '|';
+
+	// memset(fval, 0x00, BUF_LEN);
+	// sprintf(fval, "%f", trip_info.avgSpeed);
+	// str_len = getStrSize();
+	// for(int i=0; i<str_len; i++){
+	// 	ecu_msg[idx++] = fval[i];
+	// }
+	idx = setFvalMem(trip_info.avgSpeed, idx);
+	//ecu_msg[idx++] = '\n';
+	//printf("%s\n", ecu_msg);
 }
 
 void parseMsg(){
