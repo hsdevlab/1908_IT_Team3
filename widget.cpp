@@ -3,6 +3,12 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
+    socket = new QTcpSocket(this);
+    SocketConn();
+    QTimer* timer = new QTimer(this);
+    connect(timer,SIGNAL(timeout()),SLOT(sendMSG()));
+    timer->start(50);
+
     int xpos = 20;
     int ypos;
     for(int i = 0 ; i < 3 ; i++)
@@ -146,14 +152,14 @@ Widget::Widget(QWidget *parent)
 void Widget::ToQString(void){
     msg = "";
     for(int i =0; i<2; i++)
-        msg.append(QString(turnSignal[i]));
+        msg.append(QString("%1").arg(turnSignal[i]));
     for(int i =0; i<4; i++)
-        msg.append(QString(doorOpen[i]));
-    msg.append(seatbeltOn);
-    msg.append(accelator);
-    msg.append(brake);
-    msg.append(gear);
-
+        msg.append(QString("%1").arg(doorOpen[i]));
+    msg.append(QString("%1").arg(seatbeltOn));
+    msg.append(QString("%1").arg(accelator));
+    msg.append(QString("%1").arg(brake));
+    msg.append(QString("%1").arg(gear));
+    qDebug() << msg;
 
 }
 void Widget::valueChanged1(int value)
@@ -161,8 +167,8 @@ void Widget::valueChanged1(int value)
     lbl[0]->setText(QString("%1").arg(value));
     accelator = value;
     qDebug() << QString("%1").arg(accelator);
-    ToQString();
-    qDebug()<<msg;
+    //ToQString();
+    //qDebug()<<msg;
 }
 
 void Widget::valueChanged2(int value)
@@ -292,7 +298,15 @@ void Widget::valueChanged10(int value)
     qDebug() << QString("%1").arg(turnSignal[1]);
 
 }
-
+void Widget::SocketConn(){
+     socket->connectToHost("192.168.100.147", 6060);
+}
+void Widget::sendMSG(){
+    ToQString();
+    //qDebug() << "msg";
+    //qDebug() << msg;
+    socket->write(msg.toUtf8(), msg.length() + 1);
+}
 Widget::~Widget()
 {
 
