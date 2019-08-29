@@ -1,18 +1,34 @@
 #ifndef CLUSTER_UI_H
 #define CLUSTER_UI_H
 
-#include <QQuickWidget>
-#include <QtCore/QtCore>
+#include <QMainWindow>
+#include <QPainter>
+#include <QPixmap>
 #include <QDebug>
+#include <QTimer>
+#include <QTime>
+#include <QLCDNumber>
 
-class Cluster_UI : public QQuickWidget
+namespace Ui {
+class Cluster_UI;
+}
+
+class Cluster_UI : public QMainWindow
 {
     Q_OBJECT
+
 public:
-    Cluster_UI(QString source, QWidget *parent = nullptr);
+    explicit Cluster_UI(QWidget *parent = nullptr);
+    ~Cluster_UI();
 
 private:
-    QString m_source;
+    Ui::Cluster_UI *ui;
+    void paintEvent(QPaintEvent*);
+    QPixmap *doors;
+    QPixmap *fuel;
+    QPixmap *seatbelt;
+    QPixmap *turn_left;
+    QPixmap *turn_right;
 };
 
 #endif // CLUSTER_UI_H

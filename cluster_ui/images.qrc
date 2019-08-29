@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/doors_off.png</file>
+        <file>images/doors_on.png</file>
+        <file>images/fuel_off.png</file>
+        <file>images/fuel_on.png</file>
+        <file>images/seatbelt_off.png</file>
+        <file>images/seatbelt_on.png</file>
+        <file>images/turn_left_off.png</file>
+        <file>images/turn_left_on.png</file>
+        <file>images/turn_right_off.png</file>
+        <file>images/turn_right_on.png</file>
+    </qresource>
+</RCC>
