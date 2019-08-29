@@ -69,7 +69,7 @@ Widget::Widget(QWidget *parent)
     ypos = 200;
     for(int i = 0; i<4; i++){
         DO_lbl[i] = new QLabel(QString("%1").arg(DO_slider[i]->value()),this);
-        DO_lbl[i]->setGeometry(115,ypos + 10,30,40);
+        DO_lbl[i]->setGeometry(115,ypos + 10,50,40);
         ypos += 45;
     }
     nametag[4] = new QLabel(QString("DOOR"),this);
@@ -212,11 +212,11 @@ void Widget::valueChanged4(int value)
 void Widget::valueChanged5(int value)
 {
     if(value == 0){
-        DO_lbl[0]->setText(QString("OFF"));
+        DO_lbl[0]->setText(QString("CLOSED"));
         doorOpen[0] = false;
     }
     else{
-        DO_lbl[0]->setText(QString("ON"));
+        DO_lbl[0]->setText(QString("OPEN"));
         doorOpen[0] = true;
     }
 
@@ -227,11 +227,11 @@ void Widget::valueChanged5(int value)
 void Widget::valueChanged6(int value)
 {
     if(value == 0){
-        DO_lbl[1]->setText(QString("OFF"));
+        DO_lbl[1]->setText(QString("CLOSED"));
         doorOpen[1] = false;
     }
     else{
-        DO_lbl[1]->setText(QString("ON"));
+        DO_lbl[1]->setText(QString("OPEN"));
         doorOpen[1] = true;
     }
 
@@ -242,11 +242,11 @@ void Widget::valueChanged6(int value)
 void Widget::valueChanged7(int value)
 {
     if(value == 0){
-        DO_lbl[2]->setText(QString("OFF"));
+        DO_lbl[2]->setText(QString("CLOSED"));
         doorOpen[2] = false;
     }
     else{
-        DO_lbl[2]->setText(QString("ON"));
+        DO_lbl[2]->setText(QString("OPEN"));
         doorOpen[2] = true;
     }
 
@@ -257,11 +257,11 @@ void Widget::valueChanged7(int value)
 void Widget::valueChanged8(int value)
 {
     if(value == 0){
-        DO_lbl[3]->setText(QString("OFF"));
+        DO_lbl[3]->setText(QString("CLOSED"));
         doorOpen[3] = false;
     }
     else{
-        DO_lbl[3]->setText(QString("ON"));
+        DO_lbl[3]->setText(QString("OPEN"));
         doorOpen[3] = true;
     }
 
