@@ -240,6 +240,14 @@ release/moc_cluster_ui.cpp: ../cluster_ui/cluster_ui.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/qbasictimer.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/QTime \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/qdatetime.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/QLCDNumber \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qlcdnumber.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qframe.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/QTcpSocket \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qtcpsocket.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qtnetworkglobal.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qtnetwork-config.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qabstractsocket.h \
 		release/moc_predefs.h \
 		../../qt5.12.4/5.12.4/mingw73_32/bin/moc.exe
 	D:\kmw\qt5.12.4\5.12.4\mingw73_32\bin\moc.exe $(DEFINES) --include D:/kmw/cluster_project/build-cluster_ui-Desktop_Qt_5_12_4_MinGW_32_bit-Debug/release/moc_predefs.h -ID:/kmw/qt5.12.4/5.12.4/mingw73_32/mkspecs/win32-g++ -ID:/kmw/cluster_project/cluster_ui -ID:/kmw/qt5.12.4/5.12.4/mingw73_32/include -ID:/kmw/qt5.12.4/5.12.4/mingw73_32/include/QtWidgets -ID:/kmw/qt5.12.4/5.12.4/mingw73_32/include/QtGui -ID:/kmw/qt5.12.4/5.12.4/mingw73_32/include/QtANGLE -ID:/kmw/qt5.12.4/5.12.4/mingw73_32/include/QtNetwork -ID:/kmw/qt5.12.4/5.12.4/mingw73_32/include/QtCore -I. -ID:/kmw/qt5.12.4/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include/c++ -ID:/kmw/qt5.12.4/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include/c++/i686-w64-mingw32 -ID:/kmw/qt5.12.4/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include/c++/backward -ID:/kmw/qt5.12.4/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include -ID:/kmw/qt5.12.4/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include-fixed -ID:/kmw/qt5.12.4/Tools/mingw730_32/i686-w64-mingw32/include ..\cluster_ui\cluster_ui.h -o release\moc_cluster_ui.cpp
@@ -385,6 +393,14 @@ release/main.o: ../cluster_ui/main.cpp ../cluster_ui/cluster_ui.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/qbasictimer.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/QTime \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/qdatetime.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/QLCDNumber \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qlcdnumber.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qframe.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/QTcpSocket \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qtcpsocket.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qtnetworkglobal.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qtnetwork-config.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qabstractsocket.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/QApplication \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qapplication.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/qcoreapplication.h \
@@ -512,6 +528,14 @@ release/Cluster_UI.o: ../cluster_ui/Cluster_UI.cpp ../cluster_ui/cluster_ui.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/qbasictimer.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/QTime \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/qdatetime.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/QLCDNumber \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qlcdnumber.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qframe.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/QTcpSocket \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qtcpsocket.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qtnetworkglobal.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qtnetwork-config.h \
+		../../qt5.12.4/5.12.4/mingw73_32/include/QtNetwork/qabstractsocket.h \
 		ui_cluster_ui.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtCore/QVariant \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/QApplication \
@@ -521,15 +545,8 @@ release/Cluster_UI.o: ../cluster_ui/Cluster_UI.cpp ../cluster_ui/cluster_ui.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qdesktopwidget.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtGui/qguiapplication.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtGui/qinputmethod.h \
-		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/QMenuBar \
-		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qmenubar.h \
-		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qmenu.h \
-		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qaction.h \
-		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qactiongroup.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/QStatusBar \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qstatusbar.h \
-		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/QToolBar \
-		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/qtoolbar.h \
 		../../qt5.12.4/5.12.4/mingw73_32/include/QtWidgets/QWidget
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\Cluster_UI.o ..\cluster_ui\Cluster_UI.cpp
 
