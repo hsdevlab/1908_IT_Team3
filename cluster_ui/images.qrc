@@ -10,5 +10,6 @@
         <file>images/turn_left_on.png</file>
         <file>images/turn_right_off.png</file>
         <file>images/turn_right_on.png</file>
+        <file>images/gear.png</file>
     </qresource>
 </RCC>

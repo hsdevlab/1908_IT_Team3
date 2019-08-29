@@ -7,7 +7,9 @@
 #include <QDebug>
 #include <QTimer>
 #include <QTime>
-#include <QLCDNumber>
+#include <QtNetwork/QTcpSocket>
+
+#define FUEL_MAX 65.0
 
 namespace Ui {
 class Cluster_UI;
@@ -29,6 +31,22 @@ private:
     QPixmap *seatbelt;
     QPixmap *turn_left;
     QPixmap *turn_right;
+    QPixmap *gearIcon;
+    QTcpSocket *socket;
+    QString turnLeftSignal = "off";
+    QString turnRightSignal = "off";
+    QString speedSignal = "0.0";
+    QString doorsSignal = "off";
+    QString brakeSignal = "off";
+    QString seatBeltSignal = "off";
+    QString fuelSignal = "30.0";
+    QString currentMileageSignal = "0";
+    QString totalMileageSignal = "0";
+    QString gearSignal = "0";
+    QString fuelEconomySignal = "0";
+
+public slots:
+    void getData();
 };
 
 #endif // CLUSTER_UI_H
