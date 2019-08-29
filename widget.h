@@ -4,7 +4,20 @@
 #include <QSlider>
 #include <QLabel>
 #include <QDebug>
+#include <QTimer>
 #include <QtNetwork/QTcpSocket>
+
+typedef struct{
+    bool turnSignal[2] ={0,}; // {R, L}
+    bool doorOpen[4]={0,}; // {FL, FR, RL, RR}
+    bool seatbeltOn = 0;
+    int accelator = 0; // 0/1/2/3
+    int brake = 0; // 0/1/2/3
+    int gear = 0; // 0(P)/1(R)/2(N)/3(D)
+
+
+}DATA;
+
 class Widget : public QWidget
 {
     Q_OBJECT
@@ -12,16 +25,15 @@ class Widget : public QWidget
 public:
     Widget(QWidget *parent = 0);
     ~Widget();
+    bool turnSignal[2] ={0,}; // {R, L}
+    bool doorOpen[4]={0,}; // {FL, FR, RL, RR}
+    bool seatbeltOn = 0;
+    int accelator = 0; // 0/1/2/3
+    int brake = 0; // 0/1/2/3
+    int gear = 0; // 0(P)/1(R)/2(N)/3(D)
 
-    bool turnSignal[2]; // {R, L}
-    bool doorOpen[4]; // {FL, FR, RL, RR}
-    bool seatbeltOn;
-    int accelator; // 0/1/2/3
-    int brake; // 0/1/2/3
-    int gear; // 0(P)/1(R)/2(N)/3(D)
-
-    QString msg;
-
+//DATA data;
+QString msg = "";
 private:
     QTcpSocket *socket;
     QSlider *slider[3];
@@ -41,6 +53,7 @@ private:
     //void readyRead();
     //void connected(QString msg);
     void ToQString();
+    void SocketConn();
 
 private slots:
     void valueChanged1(int value);//ACCEL
@@ -53,8 +66,9 @@ private slots:
     void valueChanged8(int value);//RR
     void valueChanged9(int value);//LEFT TSIG
     void valueChanged10(int value);//RIGHT TSIG
-    //void readyRead();
-    //void connected(QString msg);
+    void sendMSG();
+
+
 };
 
 #endif // WIDGET_H

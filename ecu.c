@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include <time.h>
+#include <math.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -13,15 +16,25 @@ struct DataContainer data_con; // Controller로부터 받아온 데이터 입력
 struct EngineStatus eng_stat; // ECU에서 계산된 엔진 상태정보
 struct TripInfo trip_info; // 차량 주행시 업데이트되는 주행정보(File로 작성)
 struct tm *date;
+char ecu_msg[BUF_LEN]; // ecu -> cluster로 보내는 메세지
+char buffer[BUF_LEN];
+char fval[BUF_LEN];
 FILE *log_file;
+
+void *tServer(void *data)
+{
+    // TODO
+}
 
 int main(int argc, char *argv[])
 {
-    char buffer[BUF_LEN];
-    struct sockaddr_in server_addr, client_addr;
-    char temp[20];
+    struct sockaddr_in server_addr, client_addr, cluster_addr;
+    char client_ip[20];
     int server_fd, client_fd; // 서버/클라이언트 소켓 번호
     int len, msg_size;
+
+		//float tmp = 99.00;
+		//setFvalMem(tmp);
 
     if(argc != 2)
     {
@@ -65,8 +78,8 @@ int main(int argc, char *argv[])
             printf("Server: accept failed.\n");
             exit(0);
         }
-        inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, temp, sizeof(temp));
-        printf("Server : %s client connected.\n", temp);
+        inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, client_ip, sizeof(client_ip));
+        printf("Server : %s client connected.\n", client_ip);
 
         initStatus();
         log_file = fopen("log.txt","w");
@@ -74,24 +87,159 @@ int main(int argc, char *argv[])
             printf("Error : Can't open log file\n");
             exit(0);
         }
-        while(1)
-        {
-            // Controller로부터 메세지 받아옴
-            if(recv(client_fd, (struct DataContainer *) &data_con, sizeof(data_con), 0) <= 0) break;
-            updateEngStat();
-            updateTripInfo();
-            printDataLog();
-            printEngStat();
-            writeTripInfo();
-        }
+
+				if(!strcmp(client_ip, "192.168.100.47")) {
+					// 해당 ip 클라이언트 진입
+					while(1)
+					{
+							memset(ecu_msg, 0x00, BUF_LEN);
+							setEcuMsg();
+							if(send(client_fd, ecu_msg, BUF_LEN, 0) <= 0) break;
+							printf("send...\n");
+					}
+				} else {
+					while(1)
+					{
+							// Controller로부터 메세지 받아옴
+							memset(buffer, 0x00, BUF_LEN);
+							if(recv(client_fd, buffer, BUF_LEN, 0) <= 0) break;
+							//send(server_fd,(struct DataContainer *) &dc, sizeof(dc), 0);
+							parseMsg();
+							//printf("\n%s",buffer);
+							updateEngStat();
+							updateTripInfo();
+							//printDataLog();
+							//printEngStat();
+							writeTripInfo();
+							setEcuMsg();
+							//char *tst;
+							//getMsgStr(tst);
+					}
+				}
+
 
         close(client_fd);
         fclose(log_file);
-        printf("Server : %s client closed.\n", temp);
+        printf("Server : %s client closed.\n", client_ip);
     }
 
     close(server_fd);
     return 0;
+}
+
+int getStrSize(){
+	int i = 0;
+	while(fval[i] != '\0') i++;
+	return i;
+}
+
+void setFvalMem(float val){
+	printf("%f", val);
+	// memset(fval, 0x00, BUF_LEN);
+	// sprintf(fval, "%f", eng_stat.velocity);
+	// int str_len = getStrSize();
+	// for(int i=0; i<str_len; i++){
+	// 	ecu_msg[idx++] = fval[i];
+	// }
+}
+
+void setEcuMsg(){
+  memset(ecu_msg, 0x00, BUF_LEN); // ECU 메세지 초기화
+  int idx = 0;
+  ecu_msg[idx++] = data_con.turnSignal[0] + '0';
+	ecu_msg[idx++] = data_con.turnSignal[1] + '0';
+	ecu_msg[idx++] = '|';
+	ecu_msg[idx++] = data_con.doorOpen[0] + '0';
+	ecu_msg[idx++] = data_con.doorOpen[1] + '0';
+	ecu_msg[idx++] = data_con.doorOpen[2] + '0';
+	ecu_msg[idx++] = data_con.doorOpen[3] + '0';
+	ecu_msg[idx++] = '|';
+	ecu_msg[idx++] = data_con.seatbeltOn + '0';
+	ecu_msg[idx++] = '|';
+	ecu_msg[idx++] = data_con.accelator + '0';
+	ecu_msg[idx++] = '|';
+	ecu_msg[idx++] = data_con.brake + '0';
+	ecu_msg[idx++] = '|';
+	ecu_msg[idx++] = data_con.gear + '0';
+
+	memset(fval, 0x00, BUF_LEN);
+	sprintf(fval, "%f", eng_stat.velocity);
+	int str_len = getStrSize();
+	for(int i=0; i<str_len; i++){
+		ecu_msg[idx++] = fval[i];
+	}
+	ecu_msg[idx++] = '|';
+
+	memset(fval, 0x00, BUF_LEN);
+	sprintf(fval, "%f", eng_stat.accel);
+	str_len = getStrSize();
+	for(int i=0; i<str_len; i++){
+		ecu_msg[idx++] = fval[i];
+	}
+	ecu_msg[idx++] = '|';
+
+	memset(fval, 0x00, BUF_LEN);
+	sprintf(fval, "%f", eng_stat.fuel);
+	str_len = getStrSize();
+	for(int i=0; i<str_len; i++){
+		ecu_msg[idx++] = fval[i];
+	}
+	ecu_msg[idx++] = '|';
+
+	memset(fval, 0x00, BUF_LEN);
+	sprintf(fval, "%f", trip_info.mileage);
+	str_len = getStrSize();
+	for(int i=0; i<str_len; i++){
+		ecu_msg[idx++] = fval[i];
+	}
+	ecu_msg[idx++] = '|';
+
+	// int 길이 스트링에 세트
+	memset(fval, 0x00, BUF_LEN);
+	sprintf(fval, "%d", trip_info.driveTime);
+	str_len = getStrSize();
+	for(int i=0; i<str_len; i++){
+		ecu_msg[idx++] = fval[i];
+	}
+	ecu_msg[idx++] = '|';
+
+	memset(fval, 0x00, BUF_LEN);
+	sprintf(fval, "%d", trip_info.fuelEconomy);
+	str_len = getStrSize();
+	for(int i=0; i<str_len; i++){
+		ecu_msg[idx++] = fval[i];
+	}
+	ecu_msg[idx++] = '|';
+
+	memset(fval, 0x00, BUF_LEN);
+	sprintf(fval, "%d", trip_info.instSpeed);
+	str_len = getStrSize();
+	for(int i=0; i<str_len; i++){
+		ecu_msg[idx++] = fval[i];
+	}
+	ecu_msg[idx++] = '|';
+
+	memset(fval, 0x00, BUF_LEN);
+	sprintf(fval, "%f", trip_info.avgSpeed);
+	str_len = getStrSize();
+	for(int i=0; i<str_len; i++){
+		ecu_msg[idx++] = fval[i];
+	}
+	ecu_msg[idx++] = '\n';
+	printf("%s\n", ecu_msg);
+}
+
+void parseMsg(){
+  data_con.turnSignal[0] = buffer[0];
+  data_con.turnSignal[1] = buffer[1];
+  data_con.doorOpen[0] = buffer[2];
+  data_con.doorOpen[1] = buffer[3];
+  data_con.doorOpen[2] = buffer[4];
+  data_con.doorOpen[3] = buffer[5];
+  data_con.seatbeltOn = buffer[6];
+  data_con.accelator = buffer[7] - '0';
+  data_con.brake = buffer[8] - '0';
+  data_con.gear = buffer[9] - '0';
 }
 
 void initStatus(){
