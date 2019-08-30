@@ -293,7 +293,7 @@ void parseMsg(){
   int tl = getDeliIdx(hd);
   for(int i=hd; i<=tl; i++) media.singerName[i-hd] = buffer[i];
   media.singerName[tl+1] = '|';
-  hd = tl + 2;
+  hd = tl + 1;
   tl = getDeliIdx(hd);
   for(int i=hd; i<=tl; i++) media.songName[i-hd] = buffer[i];
   media.songName[tl+1] = '|';
@@ -310,6 +310,8 @@ void parseMsg(){
   for(int i=hd; i<tl; i++) int_arr[i-hd] = buffer[i];
   total = charArr2Int();
   media.currentPlaytime = total;
+
+  printf("@%s\n",media.songName);
 }
 
 int charArr2Int(){
