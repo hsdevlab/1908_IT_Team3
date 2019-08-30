@@ -27,6 +27,7 @@ static FILE *trip_file;
 static int tripFileLastLine = 0; // 주행정보 파일의 마지막 라인 넘버
 static int server_fd, client_fd[3]; // 서버/클라이언트 소켓 번호
 static char client_ip[20];
+static char int_arr[20];
 
 int setFvalMem(float val, int idx);
 
@@ -179,6 +180,15 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+int getTotalMile(){
+  trip_file = fopen("log.txt","r");
+  if(trip_file == NULL){
+      printf("Error : Can't open trip file\n");
+      exit(0);
+  }
+  return 0;
+}
+
 int getStrSize(){
 	int i = 0;
 	while(fval[i] != '\0') i++;
@@ -245,19 +255,22 @@ void setEcuMsg(){
   ecu_msg[idx++] = media.status + '0';
   ecu_msg[idx++] = '|';
   int slen = 0;
-  for(int i=idx; i<BUF_LEN; i++){
-    if(ecu_msg[i] != '|') { ecu_msg[i] = media.singerName[i-idx]; slen++; }
-    else break;
+  for(int i=0; i<BUF_LEN; i++){
+    if(media.singerName[i] != '|') { ecu_msg[i+idx] = media.singerName[i];}
+    else {slen=i; break;}
   }
   ecu_msg[idx+slen] = '|';
-  idx += slen + 1;
+  idx = idx + slen + 1;
   slen = 0;
-  for(int i=idx; i<BUF_LEN; i++){
-    if(ecu_msg[i] != '|') { ecu_msg[i] = media.songName[i-idx]; slen++; }
-    else break;
+  for(int i=0; i<BUF_LEN; i++){
+    if(media.songName[i] != '|') { ecu_msg[i+idx] = media.songName[i];}
+    else {slen=i; break;}
   }
   ecu_msg[idx+slen] = '|';
-  idx += slen + 1;
+  idx = idx + slen + 1;
+	idx = setIvalMem(media.totalPlaytime, idx);
+  ecu_msg[idx++] = '|';
+  idx = setIvalMem(media.currentPlaytime, idx);
 
 }
 
@@ -285,9 +298,35 @@ void parseMsg(){
   for(int i=hd; i<=tl; i++) media.songName[i-hd] = buffer[i];
   media.songName[tl+1] = '|';
 
-  printf("\n%d\n",media.status);
-  printf("%s\n",media.singerName);
-  printf("%s\n",media.songName);
+  hd = tl + 1;
+  tl = getDeliIdx(hd);
+  memset(int_arr, 0x00, 20);
+  for(int i=hd; i<tl; i++) int_arr[i-hd] = buffer[i];
+  int total = charArr2Int();
+  media.totalPlaytime = total;
+  hd = tl + 1;
+  tl = getDeliIdx(hd);
+  memset(int_arr, 0x00, 20);
+  for(int i=hd; i<tl; i++) int_arr[i-hd] = buffer[i];
+  total = charArr2Int();
+  media.currentPlaytime = total;
+}
+
+int charArr2Int(){
+  int carr_len = 0;
+
+  for(int i=0; i<20; i++){
+    if(int_arr[i] != '\0') carr_len++;
+    else break;
+  }
+
+  int sum = 0;
+  int power_num = 1;
+  for(int i=carr_len-1; i>=0; i--){
+    sum += ((int_arr[i]-'0') * power_num);
+    power_num *= 10;
+  }
+  return sum;
 }
 
 int getDeliIdx(int hd){
