@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QTime>
+#include <QDateTime>
 #include <QtNetwork/QTcpSocket>
 
 #define FUEL_MAX 65.0
@@ -32,6 +33,8 @@ private:
     QPixmap *turn_left;
     QPixmap *turn_right;
     QPixmap *gearIcon;
+    QPixmap *mediaStatIcon;
+    QPixmap *musicIcon;
     QTcpSocket *socket;
     QString turnLeftSignal = "off";
     QString turnRightSignal = "off";
@@ -39,11 +42,21 @@ private:
     QString doorsSignal = "off";
     QString brakeSignal = "off";
     QString seatBeltSignal = "off";
-    QString fuelSignal = "30.0";
+    QString fuelSignal = "65.0";
     QString currentMileageSignal = "0";
     QString totalMileageSignal = "0";
     QString gearSignal = "0";
     QString fuelEconomySignal = "0";
+    QString singerNameSignal = "";
+    QString songNameSignal = "";
+    QString mediaStatSignal = "off";
+    QString totalPlayTimeSignal = "1";
+    QString currPlayTimeSignal = "0";
+
+    int left_blinkCount = 0;
+    int right_blinkCount = 0;
+    bool left_on = false;
+    bool right_on = false;
 
 public slots:
     void getData();
