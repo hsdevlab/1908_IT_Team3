@@ -33,11 +33,10 @@ struct TripInfo{
 };
 
 struct Media{
-  char* singer;         //[14] 가수명
-  char* songName;       //[15] 노래 제목
-  char* albumName;      //[16] 앨범 제목
-  int status;           //[17] 0:Pause 1:Play
-  int totalPlaytime;    //[18] 해당 곡의 플레이 시간
-  int currentPlaytime;  //[19] 현재 플레이 시간
-  int volume;           //[20] 음량
+  char singerName[32];  //[14] 가수 이름
+  char songName[64];    //[15] 노래 이름
+  int status;           //[16] 0:Pause 1:Play
+  int totalPlaytime;    //[17] 해당 곡의 플레이 시간
+  int currentPlaytime;  //[18] 현재 플레이 시간
+  int volume;           //[19] 음량
 };
