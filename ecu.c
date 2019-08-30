@@ -12,32 +12,81 @@
 #define BUF_LEN 128
 //메시지 송수신에 사용될 버퍼 크기를 선언
 
-struct DataContainer data_con; // Controller로부터 받아온 데이터 입력
-struct EngineStatus eng_stat; // ECU에서 계산된 엔진 상태정보
-struct TripInfo trip_info; // 차량 주행시 업데이트되는 주행정보(File로 작성)
-struct tm *date;
-char ecu_msg[BUF_LEN]; // ecu -> cluster로 보내는 메세지
-char buffer[BUF_LEN];
-char fval[BUF_LEN];
-FILE *log_file;
+static struct DataContainer data_con; // Controller로부터 받아온 데이터 입력
+static struct EngineStatus eng_stat; // ECU에서 계산된 엔진 상태정보
+static struct TripInfo trip_info; // 차량 주행시 업데이트되는 주행정보(File로 작성)
+static struct tm *date;
+
+static char ecu_msg[BUF_LEN]; // ecu -> cluster로 보내는 메세지
+static char buffer[BUF_LEN];
+static char fval[BUF_LEN];
+
+static FILE *log_file;
+static int server_fd, client_fd; // 서버/클라이언트 소켓 번호
+static char client_ip[20];
 
 int setFvalMem(float val, int idx);
 
-void *tServer(void *data)
+void *controllerThread(void *data)
 {
-    // TODO
+    initStatus();
+    log_file = fopen("log.txt","w");
+    if(log_file == NULL){
+        printf("Error : Can't open log file\n");
+        exit(0);
+    }
+
+    while(1)
+    {
+        // Controller로부터 메세지 받아옴
+        memset(buffer, 0x00, BUF_LEN);
+        if(recv(client_fd, buffer, BUF_LEN, 0) <= 0) break;
+        parseMsg();
+        updateEngStat();
+        updateTripInfo();
+        printDataLog();
+        printEngStat();
+        writeTripInfo();
+        setEcuMsg();
+    }
+    fclose(log_file);
+}
+
+void *clusterThread()
+{
+  /*
+   * 클러스터 스레드
+   *
+   */
+    printf("clu thread in\n");
+    while(1)
+    {
+        memset(ecu_msg, 0x00, BUF_LEN+1);
+
+        data_con.turnSignal[0] = true;
+        data_con.doorOpen[0] = true;
+        data_con.seatbeltOn = true;
+        data_con.gear = D;
+        eng_stat.velocity = 60;
+        eng_stat.fuel = 65;
+        setEcuMsg();
+        ecu_msg[BUF_LEN] = '\n';
+        if(send(client_fd, ecu_msg, BUF_LEN+1, 0) <= 0) {
+          printf("send fail\n");
+          break;
+        }
+        printf("send : %s\n", ecu_msg);
+    }
+    close(client_fd);
+    printf("Server : %s client closed.\n", client_ip);
 }
 
 int main(int argc, char *argv[])
 {
     struct sockaddr_in server_addr, client_addr, cluster_addr;
-    char client_ip[20];
-    int server_fd, client_fd; // 서버/클라이언트 소켓 번호
     int len, msg_size;
-
-		// float tmp = 99;
-		// int i = 0;
-		// i = setFvalMem(tmp, i);
+    pthread_t thread_clu, thread_con; // 클러스터/컨트롤러 스레드
+    int thread_id1, thread_id2;
 
     if(argc != 2)
     {
@@ -84,51 +133,47 @@ int main(int argc, char *argv[])
         inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, client_ip, sizeof(client_ip));
         printf("Server : %s client connected.\n", client_ip);
 
-        initStatus();
-        log_file = fopen("log.txt","w");
-        if(log_file == NULL){
-            printf("Error : Can't open log file\n");
-            exit(0);
-        }
-
 				if(!strcmp(client_ip, "192.168.100.47")) {
 					// 해당 ip 클라이언트 진입
-					while(1)
-					{
-							memset(ecu_msg, 0x00, BUF_LEN+1);
-							eng_stat.velocity = 60;
-							data_con.turnSignal[0] = true;
-							data_con.doorOpen[0] = true;
-							data_con.gear = D;
-							setEcuMsg();
-							ecu_msg[BUF_LEN] = '\n';
-							if(send(client_fd, ecu_msg, BUF_LEN+1, 0) <= 0) break;
-							printf("send : %s\n", ecu_msg);
-					}
+					// while(1)
+					// {
+					// 		memset(ecu_msg, 0x00, BUF_LEN+1);
+					// 		setEcuMsg();
+					// 		ecu_msg[BUF_LEN] = '\n';
+					// 		if(send(client_fd, ecu_msg, BUF_LEN+1, 0) <= 0) break;
+					// 		printf("send : %s\n", ecu_msg);
+					// }
+          thread_id1 = pthread_create(&thread_clu, NULL, clusterThread, NULL);
+          if(thread_id1 < 0){
+            perror("cluster thread create error : ");
+            exit(0);
+          }
 				} else {
+          initStatus();
+          log_file = fopen("log.txt","w");
+          if(log_file == NULL){
+              printf("Error : Can't open log file\n");
+              exit(0);
+          }
+
 					while(1)
 					{
 							// Controller로부터 메세지 받아옴
 							memset(buffer, 0x00, BUF_LEN);
 							if(recv(client_fd, buffer, BUF_LEN, 0) <= 0) break;
-							//send(server_fd,(struct DataContainer *) &dc, sizeof(dc), 0);
 							parseMsg();
-							//printf("\n%s",buffer);
 							updateEngStat();
 							updateTripInfo();
-							//printDataLog();
-							//printEngStat();
+							printDataLog();
+							printEngStat();
 							writeTripInfo();
 							setEcuMsg();
-							//char *tst;
-							//getMsgStr(tst);
 					}
+          fclose(log_file);
 				}
 
-
-        close(client_fd);
-        fclose(log_file);
-        printf("Server : %s client closed.\n", client_ip);
+        //close(client_fd);
+        //printf("Server : %s client closed.\n", client_ip);
     }
 
     close(server_fd);
@@ -171,78 +216,21 @@ void setEcuMsg(){
 	ecu_msg[idx++] = data_con.gear + '0';
 	ecu_msg[idx++] = '|';
 
-	// memset(fval, 0x00, BUF_LEN);
-	// sprintf(fval, "%f", eng_stat.velocity);
-	// int str_len = getStrSize();
-	// for(int i=0; i<str_len; i++){
-	// 	ecu_msg[idx++] = fval[i];
-	// }
 	idx = setFvalMem(eng_stat.velocity, idx);
 	ecu_msg[idx++] = '|';
-
-	// memset(fval, 0x00, BUF_LEN);
-	// sprintf(fval, "%f", eng_stat.accel);
-	// str_len = getStrSize();
-	// for(int i=0; i<str_len; i++){
-	// 	ecu_msg[idx++] = fval[i];
-	// }
 	idx = setFvalMem(eng_stat.accel, idx);
 	ecu_msg[idx++] = '|';
-
-	// memset(fval, 0x00, BUF_LEN);
-	// sprintf(fval, "%f", eng_stat.fuel);
-	// str_len = getStrSize();
-	// for(int i=0; i<str_len; i++){
-	// 	ecu_msg[idx++] = fval[i];
-	// }
 	idx = setFvalMem(eng_stat.fuel, idx);
 	ecu_msg[idx++] = '|';
-
-	// memset(fval, 0x00, BUF_LEN);
-	// sprintf(fval, "%f", trip_info.mileage);
-	// str_len = getStrSize();
-	// for(int i=0; i<str_len; i++){
-	// 	ecu_msg[idx++] = fval[i];
-	// }
 	idx = setFvalMem(trip_info.mileage, idx);
 	ecu_msg[idx++] = '|';
-
-	// memset(fval, 0x00, BUF_LEN);
-	// sprintf(fval, "%d", trip_info.driveTime);
-	// str_len = getStrSize();
-	// for(int i=0; i<str_len; i++){
-	// 	ecu_msg[idx++] = fval[i];
-	// }
 	idx = setFvalMem(trip_info.driveTime, idx);
 	ecu_msg[idx++] = '|';
-
-	// memset(fval, 0x00, BUF_LEN);
-	// sprintf(fval, "%d", trip_info.fuelEconomy);
-	// str_len = getStrSize();
-	// for(int i=0; i<str_len; i++){
-	// 	ecu_msg[idx++] = fval[i];
-	// }
 	idx = setFvalMem(trip_info.fuelEconomy, idx);
 	ecu_msg[idx++] = '|';
-
-	// memset(fval, 0x00, BUF_LEN);
-	// sprintf(fval, "%d", trip_info.instSpeed);
-	// str_len = getStrSize();
-	// for(int i=0; i<str_len; i++){
-	// 	ecu_msg[idx++] = fval[i];
-	// }
 	idx = setFvalMem(trip_info.instSpeed, idx);
 	ecu_msg[idx++] = '|';
-
-	// memset(fval, 0x00, BUF_LEN);
-	// sprintf(fval, "%f", trip_info.avgSpeed);
-	// str_len = getStrSize();
-	// for(int i=0; i<str_len; i++){
-	// 	ecu_msg[idx++] = fval[i];
-	// }
 	idx = setFvalMem(trip_info.avgSpeed, idx);
-	//ecu_msg[idx++] = '\n';
-	//printf("%s\n", ecu_msg);
 }
 
 void parseMsg(){
