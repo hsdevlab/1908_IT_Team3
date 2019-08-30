@@ -11,5 +11,8 @@
         <file>images/turn_right_off.png</file>
         <file>images/turn_right_on.png</file>
         <file>images/gear.png</file>
+        <file>images/media_pause.png</file>
+        <file>images/media_start.png</file>
+        <file>images/music_icon.png</file>
     </qresource>
 </RCC>

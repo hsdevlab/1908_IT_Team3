@@ -12,7 +12,7 @@ Cluster_UI::Cluster_UI(QWidget *parent) :
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-    timer->start(30);
+    timer->start(50);
 
     QPalette pal = palette();
     pal.setColor(QPalette::Background, QColor(1, 2, 20));
@@ -27,6 +27,8 @@ void Cluster_UI::paintEvent(QPaintEvent *){
     int side = qMin(width(), height());
     double speedValue = speedSignal.toDouble();
     double fuelValue = (fuelSignal.toDouble() / FUEL_MAX) * 100;
+    QDateTime currTime = QDateTime::currentDateTime();
+    QString time_format = "yyyy-MM-dd\n HH:mm:ss";
 
     static const QPoint speedNeedle[5] = {
         QPoint(1, 3),
@@ -67,6 +69,7 @@ void Cluster_UI::paintEvent(QPaintEvent *){
         QPoint(20, 17),
         QPoint(-3, 31)
     };
+
     static const QString gearValue[4] = {
         "P", "R", "N", "D"
     };
@@ -76,14 +79,19 @@ void Cluster_UI::paintEvent(QPaintEvent *){
     QColor meter2Color(0, 57, 78);
     QColor cautionColor(255, 30, 30);
     QColor cautionColor2(70, 50, 50);
+    QColor digitalColor(125, 180, 220);
 
     painter.setRenderHint(QPainter::Antialiasing);
     painter.translate(this->width() / 2, this->height() / 2);
     painter.scale(side / 300.0, side / 300.0);
 
     QRectF speed_lcd = QRectF(QPointF(-15, 46), QPointF(18, 30));
-    QRectF total_mileage_lcd = QRectF(QPointF(-330, 46), QPointF(18, 30));
-    QRectF current_mileage_lcd = QRectF(QPointF(-410, 46), QPointF(18, 30));
+    QRectF kmh = QRectF(QPointF(-15, 21), QPointF(18, 30));
+    QRectF total_mileage_lcd = QRectF(QPointF(-330, 100), QPointF(18, 30));
+    QRectF current_mileage_lcd = QRectF(QPointF(-410, 100), QPointF(18, 30));
+    QRectF current_time = QRectF(QPointF(313, 10), QPointF(18, 30));
+    QRectF total_text = QRectF(QPointF(-330, 120), QPointF(18, 30));
+    QRectF current_text = QRectF(QPointF(-410, 120), QPointF(18, 30));
     painter.setPen(QColor(255, 255, 255));
     QFont speedFont = QFont("DS-Digital");
     speedFont.setBold(true);
@@ -91,22 +99,36 @@ void Cluster_UI::paintEvent(QPaintEvent *){
     QFont defaultFont = QFont("Impact");
     defaultFont.setBold(true);
     defaultFont.setWeight(20);
+    QFont musicFont("나눔바른고딕", 6);
+    musicFont.setBold(true);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setFont(defaultFont);
+    painter.drawText(kmh, Qt::AlignCenter, "km/h");
+    painter.setFont(musicFont);
+    painter.drawText(total_text, Qt::AlignCenter, "총 주행");
+    painter.drawText(current_text, Qt::AlignCenter, "현재 주행");
     painter.setFont(speedFont);
+    painter.setPen(meterColor);
 
     painter.drawText(speed_lcd, Qt::AlignCenter, QString("%1").arg((int)speedValue));
-    painter.drawText(current_mileage_lcd, Qt::AlignCenter, currentMileageSignal);
-    painter.drawText(total_mileage_lcd, Qt::AlignCenter, totalMileageSignal);
+    painter.drawText(current_mileage_lcd, Qt::AlignCenter, currentMileageSignal + "km");
+    painter.drawText(total_mileage_lcd, Qt::AlignCenter, totalMileageSignal + "km");
+    painter.drawText(current_time, Qt::AlignCenter, currTime.toString(time_format));    
     painter.save();
 
     //연료
-    painter.translate(-180, 0);
+    painter.translate(-180, 20);
     painter.setPen(needleColor);
     painter.setBrush(needleColor);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.save();
 
-    painter.rotate((fuelValue * 1.8) + 180.0);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.rotate(180 + (fuelValue * -1.8));
     painter.drawConvexPolygon(fuelNeedle, 5);
+    painter.setPen(meterColor);
+    painter.setBrush(meterColor);
+    painter.drawEllipse(-2, -2, 4, 4);
     painter.restore();
     painter.setPen(meterColor);
     painter.rotate(-90.0);
@@ -132,20 +154,41 @@ void Cluster_UI::paintEvent(QPaintEvent *){
     painter.save();
 
     //기어
-    painter.translate(-180, -70);
+    painter.translate(-180, -50);
     painter.setPen(needleColor);
     painter.setBrush(needleColor);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.save();
 
-    painter.rotate((gearSignal.toInt() * 45));
+    painter.rotate((gearSignal.toInt() * 60));
     painter.drawConvexPolygon(gearNeedle, 5);
+    painter.setPen(meterColor);
+    painter.setBrush(meterColor);
+    painter.drawEllipse(-2, -2, 4, 4);
     painter.restore();
     painter.setPen(meterColor);
     painter.setFont(defaultFont);
     for(int i = 0; i < 4; i++){
         painter.drawText(gearMeter[i], gearValue[i]);
     }
+    //뮤직 슬라이더
+    painter.translate(315, 20);
+
+    painter.setPen(needleColor);
+    QRectF song = QRectF(QPointF(0, -20), QPointF(100, 20));
+    QRectF singer = QRectF(QPointF(0, -10), QPointF(100, 20));
+    painter.setFont(musicFont);
+    painter.drawText(song, songNameSignal);
+    musicFont.setBold(false);
+    musicFont.setPointSize(4);
+    painter.setFont(musicFont);
+    painter.drawText(singer, singerNameSignal);
+    painter.rotate(270);
+    painter.drawLine(0, 0, 0, 60);
+    painter.setPen(meterColor);
+    int musicTime = (int)(60.0 * (currPlayTimeSignal.toDouble() / totalPlayTimeSignal.toDouble()));
+    painter.drawLine(0, 0, 0, musicTime);
+    painter.drawEllipse(-2, musicTime, 4, 4);
     painter.restore();
 
     //속도계
@@ -159,6 +202,9 @@ void Cluster_UI::paintEvent(QPaintEvent *){
     painter.setBrush(needleColor);
     painter.rotate(90.0 + speedValue);
     painter.drawConvexPolygon(speedNeedle, 5);
+    painter.setPen(meterColor);
+    painter.setBrush(meterColor);
+    painter.drawEllipse(-3, -1, 8, 8);
 
     painter.restore();
     painter.save();
@@ -209,6 +255,8 @@ void Cluster_UI::paintEvent(QPaintEvent *){
     turn_left = new QPixmap();
     turn_right = new QPixmap();
     gearIcon = new QPixmap();
+    mediaStatIcon = new QPixmap();
+    musicIcon = new QPixmap();
 
     if(!doors->load(":images/doors_" + doorsSignal + ".png")) {
         qDebug() << "이미지 불러오기 에러: :images/doors" + doorsSignal + ".png";
@@ -224,24 +272,81 @@ void Cluster_UI::paintEvent(QPaintEvent *){
     if(!seatbelt->load(":images/seatbelt_" + seatBeltSignal + ".png")) {
         qDebug() << "이미지 불러오기 에러: seatbelt" + seatBeltSignal + ".png";
     }
-    if(!turn_left->load(":images/turn_left_" + turnLeftSignal + ".png")) {
-        qDebug() << "이미지 불러오기 에러: turn_left_" + turnLeftSignal + ".png";
+
+    //깜빡이
+    if(turnLeftSignal == "on"){
+        if(left_blinkCount % 50 < 25){
+            left_on = false;
+            if(!turn_left->load(":images/turn_left_off.png")) {
+                qDebug() << "이미지 불러오기 에러:turn_left_off.png";
+            }
+        }
+        else{
+            left_on = true;
+            if(!turn_left->load(":images/turn_left_on.png")) {
+                qDebug() << "이미지 불러오기 에러:turn_left_on.png";
+            }
+        }
+        left_blinkCount++;
     }
-    if(!turn_right->load(":images/turn_right_" + turnRightSignal + ".png")) {
-        qDebug() << "이미지 불러오기 에러: turn_right_" + turnRightSignal + ".png";
+    else{
+        if(!turn_left->load(":images/turn_left_off.png")) {
+            qDebug() << "이미지 불러오기 에러: turn_left_off.png";
+        }
     }
+
+    if(turnRightSignal == "on"){
+        if(right_blinkCount % 50 < 25){
+            right_on = false;
+            if(!turn_right->load(":images/turn_right_off.png")) {
+                qDebug() << "이미지 불러오기 에러:turn_right_off.png";
+            }
+        }
+        else{
+            right_on = true;
+            if(!turn_right->load(":images/turn_right_on.png")) {
+                qDebug() << "이미지 불러오기 에러:turn_right_on.png";
+            }
+        }
+        right_blinkCount++;
+    }
+    else{
+        if(!turn_right->load(":images/turn_right_off.png")) {
+            qDebug() << "이미지 불러오기 에러: turn_right_off.png";
+        }
+    }
+
     if(!gearIcon->load(":images/gear.png")) {
         qDebug() << "이미지 불러오기 에러: gear.png";
     }
 
+    if(mediaStatSignal == "off"){
+        if(!mediaStatIcon->load(":images/media_start.png")) {
+            qDebug() << "이미지 불러오기 에러: media_start.png";
+        }
+    }
+    else{
+        if(!mediaStatIcon->load(":images/media_pause.png")) {
+            qDebug() << "이미지 불러오기 에러: gear.png";
+        }
+    }
+
+    if(!musicIcon->load(":images/music_icon.png")){
+        qDebug() << "이미지 불러오기 에러: music.png";
+    }
+
+
     painter.scale(0.2, 0.2);
     painter.rotate(-40.0);
-    painter.drawPixmap(800, 180, *doors);
-    painter.drawPixmap(-1000, -20, *fuel);
-    painter.drawPixmap(900, 180, *seatbelt);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    painter.drawPixmap(700, 275, *doors);
+    painter.drawPixmap(-1050, 80, *fuel);
+    painter.drawPixmap(900, 275, *seatbelt);
     painter.drawPixmap(-550, -650, *turn_left);
     painter.drawPixmap(450, -650, *turn_right);
-    painter.drawPixmap(-1000, -380, *gearIcon);
+    painter.drawPixmap(-1050, -280, *gearIcon);
+    painter.drawPixmap(805, -130, *mediaStatIcon);
+    painter.drawPixmap(677, -550, *musicIcon);
 }
 
 void Cluster_UI::getData(){
@@ -250,20 +355,64 @@ void Cluster_UI::getData(){
         qDebug() << line;
 
         QStringList data = line.split("|");
+        if(data.length() >= 18){
+            turnLeftSignal = data[0].at(0) == "1" ? "on" : "off";
+            turnRightSignal = data[0].at(1) == "1" ? "on" : "off";
 
-        turnLeftSignal = data[0].at(0) == "1" ? "on" : "off";
-        turnRightSignal = data[0].at(1) == "1" ? "on" : "off";
-        doorsSignal = data[1].toInt() > 0 ? "on" : "off";
-        seatBeltSignal = data[2] == "1" ? "on" : "off";
-        brakeSignal = data[4].toInt() > 0 ? "on" : "off";
-        gearSignal = (QString)data[5].toInt(); //0123: PRND
-        speedSignal = data[6];
-        fuelSignal = data[7];
-        currentMileageSignal = (QString)data[8].toInt();
-        totalMileageSignal = (QString)data[8].toInt();
-        fuelEconomySignal = data[10];
+            if(turnLeftSignal == "off"){
+                left_blinkCount = 0;
+                left_on = false;
+            }
 
-        qDebug() << "speed: " << speedSignal << " fuel: " << fuelSignal;
+            if(turnRightSignal == "off"){
+                right_blinkCount = 0;
+                right_on = false;
+            }
+
+            doorsSignal = data[1].toInt() > 0 ? "on" : "off";
+            seatBeltSignal = data[2] == "1" ? "on" : "off";
+            brakeSignal = data[4].toInt() > 0 ? "on" : "off";
+            gearSignal = data[5]; //0123: PRND
+            speedSignal = data[6];
+            fuelSignal = data[8];
+            currentMileageSignal = data[9];
+            totalMileageSignal = data[9];
+            fuelEconomySignal = data[11];
+            singerNameSignal = data[14];
+            songNameSignal = data[15];
+            mediaStatSignal = data[16] == "1" ? "on" : "off";
+            totalPlayTimeSignal = data[17];
+            currPlayTimeSignal = data[18];
+        }
+        else{
+            turnLeftSignal = "off";
+            turnRightSignal ="off";
+
+            if(turnLeftSignal == "off"){
+                left_blinkCount = 0;
+                left_on = false;
+            }
+
+            if(turnRightSignal == "off"){
+                right_blinkCount = 0;
+                right_on = false;
+            }
+
+            doorsSignal = "off";
+            seatBeltSignal = "off";
+            brakeSignal = "off";
+            gearSignal = "0";
+            speedSignal = "0";
+            fuelSignal = "0";
+            currentMileageSignal = "0.0";
+            totalMileageSignal = "0.0";
+            fuelEconomySignal = "0.0";
+            singerNameSignal = "-";
+            songNameSignal = "Untitled";
+            mediaStatSignal = "off";
+            totalPlayTimeSignal = "1";
+            currPlayTimeSignal = "0";
+        }
     }
 }
 Cluster_UI::~Cluster_UI()
