@@ -22,25 +22,28 @@ static char buffer[BUF_LEN];
 static char fval[BUF_LEN];
 
 static FILE *log_file;
-static int server_fd, client_fd; // 서버/클라이언트 소켓 번호
+static int server_fd, client_fd[2]; // 서버/클라이언트 소켓 번호
 static char client_ip[20];
 
 int setFvalMem(float val, int idx);
 
 void *controllerThread(void *data)
 {
+  /*
+   * 클러스터 스레드 함수
+   * 클러스터 클라이언트 소켓으로 DataContainer + EngineStatus + TripInfo 메세지 전달
+   */
     initStatus();
     log_file = fopen("log.txt","w");
     if(log_file == NULL){
         printf("Error : Can't open log file\n");
         exit(0);
     }
-
     while(1)
     {
         // Controller로부터 메세지 받아옴
         memset(buffer, 0x00, BUF_LEN);
-        if(recv(client_fd, buffer, BUF_LEN, 0) <= 0) break;
+        if(recv(*((int *)data), buffer, BUF_LEN, 0) <= 0) break;
         parseMsg();
         updateEngStat();
         updateTripInfo();
@@ -50,34 +53,30 @@ void *controllerThread(void *data)
         setEcuMsg();
     }
     fclose(log_file);
+    close(*((int *)data));
+    printf("Server : %s client closed.\n", client_ip);
 }
 
-void *clusterThread()
+void *clusterThread(void *data)
 {
   /*
-   * 클러스터 스레드
-   *
+   * 클러스터 스레드 함수
+   * 클러스터 클라이언트 소켓으로 DataContainer + EngineStatus + TripInfo 메세지 전달
    */
     printf("clu thread in\n");
     while(1)
     {
+        usleep(50000);
         memset(ecu_msg, 0x00, BUF_LEN+1);
-
-        data_con.turnSignal[0] = true;
-        data_con.doorOpen[0] = true;
-        data_con.seatbeltOn = true;
-        data_con.gear = D;
-        eng_stat.velocity = 60;
-        eng_stat.fuel = 65;
         setEcuMsg();
         ecu_msg[BUF_LEN] = '\n';
-        if(send(client_fd, ecu_msg, BUF_LEN+1, 0) <= 0) {
+        if(send(*((int *)data), ecu_msg, BUF_LEN+1, 0) <= 0) {
           printf("send fail\n");
           break;
         }
-        printf("send : %s\n", ecu_msg);
+        printf("send : %s\n\n", ecu_msg);
     }
-    close(client_fd);
+    close(*((int *)data));
     printf("Server : %s client closed.\n", client_ip);
 }
 
@@ -85,6 +84,7 @@ int main(int argc, char *argv[])
 {
     struct sockaddr_in server_addr, client_addr, cluster_addr;
     int len, msg_size;
+    int tnum = 0;
     pthread_t thread_clu, thread_con; // 클러스터/컨트롤러 스레드
     int thread_id1, thread_id2;
 
@@ -124,8 +124,8 @@ int main(int argc, char *argv[])
     len = sizeof(client_addr);
     while(1)
     {
-        client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &len);
-        if(client_fd < 0)
+        client_fd[tnum] = accept(server_fd, (struct sockaddr *)&client_addr, &len);
+        if(client_fd[tnum] < 0)
         {
             printf("Server: accept failed.\n");
             exit(0);
@@ -134,46 +134,20 @@ int main(int argc, char *argv[])
         printf("Server : %s client connected.\n", client_ip);
 
 				if(!strcmp(client_ip, "192.168.100.47")) {
-					// 해당 ip 클라이언트 진입
-					// while(1)
-					// {
-					// 		memset(ecu_msg, 0x00, BUF_LEN+1);
-					// 		setEcuMsg();
-					// 		ecu_msg[BUF_LEN] = '\n';
-					// 		if(send(client_fd, ecu_msg, BUF_LEN+1, 0) <= 0) break;
-					// 		printf("send : %s\n", ecu_msg);
-					// }
-          thread_id1 = pthread_create(&thread_clu, NULL, clusterThread, NULL);
+          thread_id1 = pthread_create(&thread_clu, NULL, clusterThread, (void *)&client_fd[tnum]);
           if(thread_id1 < 0){
             perror("cluster thread create error : ");
             exit(0);
           }
 				} else {
-          initStatus();
-          log_file = fopen("log.txt","w");
-          if(log_file == NULL){
-              printf("Error : Can't open log file\n");
-              exit(0);
+          thread_id2 = pthread_create(&thread_con, NULL, controllerThread, (void *)&client_fd[tnum]);
+          if(thread_id2 < 0){
+            perror("controller thread create error : ");
+            exit(0);
           }
-
-					while(1)
-					{
-							// Controller로부터 메세지 받아옴
-							memset(buffer, 0x00, BUF_LEN);
-							if(recv(client_fd, buffer, BUF_LEN, 0) <= 0) break;
-							parseMsg();
-							updateEngStat();
-							updateTripInfo();
-							printDataLog();
-							printEngStat();
-							writeTripInfo();
-							setEcuMsg();
-					}
-          fclose(log_file);
 				}
-
-        //close(client_fd);
-        //printf("Server : %s client closed.\n", client_ip);
+        tnum++;
+        sleep(1);
     }
 
     close(server_fd);
@@ -234,13 +208,13 @@ void setEcuMsg(){
 }
 
 void parseMsg(){
-  data_con.turnSignal[0] = buffer[0];
-  data_con.turnSignal[1] = buffer[1];
-  data_con.doorOpen[0] = buffer[2];
-  data_con.doorOpen[1] = buffer[3];
-  data_con.doorOpen[2] = buffer[4];
-  data_con.doorOpen[3] = buffer[5];
-  data_con.seatbeltOn = buffer[6];
+  data_con.turnSignal[0] = buffer[0] - '0';
+  data_con.turnSignal[1] = buffer[1] - '0';
+  data_con.doorOpen[0] = buffer[2] - '0';
+  data_con.doorOpen[1] = buffer[3] - '0';
+  data_con.doorOpen[2] = buffer[4] - '0';
+  data_con.doorOpen[3] = buffer[5] - '0';
+  data_con.seatbeltOn = buffer[6] - '0';
   data_con.accelator = buffer[7] - '0';
   data_con.brake = buffer[8] - '0';
   data_con.gear = buffer[9] - '0';
@@ -295,14 +269,6 @@ void writeTripInfo(){
   // 주행 정보 파일 작성
   const time_t t = time(NULL);
   date = localtime(&t);
-
-  // fprintf(log_file, "=== Trip Info ===\n");
-  // fprintf(log_file, "%d/%02d/%02d %02d:%02d:%02d\n", date->tm_year+1900, date->tm_mon+1, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
-  // fprintf(log_file, "Mileage : %.4f km\n", trip_info.mileage);
-  // fprintf(log_file, "Fuel Economy : %d\n", trip_info.fuelEconomy);
-  // fprintf(log_file, "Instantaneous Car Speed : %d km/h\n", trip_info.instSpeed);
-  // fprintf(log_file, "Average Car Speed : %.2f km/h\n\n", trip_info.avgSpeed);
-
   fprintf(log_file, "%d/%02d/%02d %02d:%02d:%02d", date->tm_year+1900, date->tm_mon+1, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
   fprintf(log_file, "| Mileage:%.4fkm\t", trip_info.mileage);
   fprintf(log_file, "| FuelEco:%d\t", trip_info.fuelEconomy);
@@ -321,7 +287,7 @@ void updateEngStat(){
    * 최대속도(260km/h)에서 가속하거나 최저속도(0km/h)에서 감속할 경우 현상유지
    */
   if(data_con.accelator != 0 || data_con.brake != 0)
-    eng_stat.accel = 0.25 * (data_con.accelator - data_con.brake);
+    eng_stat.accel = 0.25 * (data_con.accelator - (4 * data_con.brake));
   else
     eng_stat.accel = -0.25;
 
