@@ -2,10 +2,10 @@ CC=gcc
 CFLAGS=-g -wall
 EOBJS=ecu.o
 ECU=ecu
-COBJS=controller.o
-CONT=controller
+GOBJS=engine.o
+ENG=engine
 
-all: $(ECU) $(CONT)
+all: $(ECU) $(ENG)
 
 ecu.o: ecu.c ecu.h
 	$(CC) -c ecu.c -lm -pthread
@@ -13,13 +13,13 @@ ecu.o: ecu.c ecu.h
 $(ECU):$(EOBJS)
 	$(CC) -o ecu ecu.o -lm -pthread
 
-controller.o: controller.c ecu.h
-	$(CC) -c controller.c
+engine.o: engine.c ecu.h
+	$(CC) -c engine.c
 
-$(CONT):$(COBJS)
-	$(CC) -o controller controller.o
+$(ENG):$(GOBJS)
+	$(CC) -o engine engine.o
 
 clean:
 	rm -f *.o
 	rm -f $(ECU)
-	rm -f $(CONT)
+	rm -f $(ENG)

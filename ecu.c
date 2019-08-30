@@ -9,12 +9,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "ecu.h"
-#define BUF_LEN 128
+#define BUF_LEN 256
 //메시지 송수신에 사용될 버퍼 크기를 선언
 
 static struct DataContainer data_con; // Controller로부터 받아온 데이터 입력
 static struct EngineStatus eng_stat; // ECU에서 계산된 엔진 상태정보
 static struct TripInfo trip_info; // 차량 주행시 업데이트되는 주행정보(File로 작성)
+static struct Media media;
 static struct tm *date;
 
 static char ecu_msg[BUF_LEN]; // ecu -> cluster로 보내는 메세지
@@ -22,7 +23,9 @@ static char buffer[BUF_LEN];
 static char fval[BUF_LEN];
 
 static FILE *log_file;
-static int server_fd, client_fd[2]; // 서버/클라이언트 소켓 번호
+static FILE *trip_file;
+static int tripFileLastLine = 0; // 주행정보 파일의 마지막 라인 넘버
+static int server_fd, client_fd[3]; // 서버/클라이언트 소켓 번호
 static char client_ip[20];
 
 int setFvalMem(float val, int idx);
@@ -63,7 +66,6 @@ void *clusterThread(void *data)
    * 클러스터 스레드 함수
    * 클러스터 클라이언트 소켓으로 DataContainer + EngineStatus + TripInfo 메세지 전달
    */
-    printf("clu thread in\n");
     while(1)
     {
         usleep(50000);
@@ -80,13 +82,27 @@ void *clusterThread(void *data)
     printf("Server : %s client closed.\n", client_ip);
 }
 
+void *engineThread(void *data)
+{
+    while(1)
+    {
+        usleep(50000);
+        if(send(*((int *)data), (struct EngineStatus *) &eng_stat, sizeof(eng_stat), 0) <= 0) {
+          printf("send fail\n");
+          break;
+        }
+    }
+    close(*((int *)data));
+    printf("Server : %s client closed.\n", client_ip);
+}
+
 int main(int argc, char *argv[])
 {
     struct sockaddr_in server_addr, client_addr, cluster_addr;
     int len, msg_size;
     int tnum = 0;
-    pthread_t thread_clu, thread_con; // 클러스터/컨트롤러 스레드
-    int thread_id1, thread_id2;
+    pthread_t thread_clu, thread_con, thread_eng; // 클러스터/컨트롤러 스레드
+    int thread_id1, thread_id2, thread_id3;
 
     if(argc != 2)
     {
@@ -134,14 +150,23 @@ int main(int argc, char *argv[])
         printf("Server : %s client connected.\n", client_ip);
 
 				if(!strcmp(client_ip, "192.168.100.47")) {
+          // 클러스터 스레드
           thread_id1 = pthread_create(&thread_clu, NULL, clusterThread, (void *)&client_fd[tnum]);
           if(thread_id1 < 0){
             perror("cluster thread create error : ");
             exit(0);
           }
-				} else {
-          thread_id2 = pthread_create(&thread_con, NULL, controllerThread, (void *)&client_fd[tnum]);
+				} else if(!strcmp(client_ip, "127.0.0.1")){
+          // 엔진 스레드
+          thread_id2 = pthread_create(&thread_eng, NULL, engineThread, (void *)&client_fd[tnum]);
           if(thread_id2 < 0){
+            perror("engine thread create error : ");
+            exit(0);
+          }
+        } else {
+          // 컨트롤러 스레드
+          thread_id3 = pthread_create(&thread_con, NULL, controllerThread, (void *)&client_fd[tnum]);
+          if(thread_id3 < 0){
             perror("controller thread create error : ");
             exit(0);
           }
@@ -162,7 +187,17 @@ int getStrSize(){
 
 int setFvalMem(float val, int idx){
 	memset(fval, 0x00, BUF_LEN);
-	sprintf(fval, "%f", val);
+	sprintf(fval, "%.2f", val);
+	int str_len = getStrSize();
+	for(int i=0; i<str_len; i++){
+		ecu_msg[idx++] = fval[i];
+	}
+	return idx;
+}
+
+int setIvalMem(int val, int idx){
+	memset(fval, 0x00, BUF_LEN);
+	sprintf(fval, "%d", val);
 	int str_len = getStrSize();
 	for(int i=0; i<str_len; i++){
 		ecu_msg[idx++] = fval[i];
@@ -198,13 +233,32 @@ void setEcuMsg(){
 	ecu_msg[idx++] = '|';
 	idx = setFvalMem(trip_info.mileage, idx);
 	ecu_msg[idx++] = '|';
-	idx = setFvalMem(trip_info.driveTime, idx);
+	idx = setIvalMem(trip_info.driveTime, idx);
 	ecu_msg[idx++] = '|';
-	idx = setFvalMem(trip_info.fuelEconomy, idx);
+	idx = setIvalMem(trip_info.fuelEconomy, idx);
 	ecu_msg[idx++] = '|';
-	idx = setFvalMem(trip_info.instSpeed, idx);
+	idx = setIvalMem(trip_info.instSpeed, idx);
 	ecu_msg[idx++] = '|';
 	idx = setFvalMem(trip_info.avgSpeed, idx);
+
+  ecu_msg[idx++] = '|';
+  ecu_msg[idx++] = media.status + '0';
+  ecu_msg[idx++] = '|';
+  int slen = 0;
+  for(int i=idx; i<BUF_LEN; i++){
+    if(ecu_msg[i] != '|') { ecu_msg[i] = media.singerName[i-idx]; slen++; }
+    else break;
+  }
+  ecu_msg[idx+slen] = '|';
+  idx += slen + 1;
+  slen = 0;
+  for(int i=idx; i<BUF_LEN; i++){
+    if(ecu_msg[i] != '|') { ecu_msg[i] = media.songName[i-idx]; slen++; }
+    else break;
+  }
+  ecu_msg[idx+slen] = '|';
+  idx += slen + 1;
+
 }
 
 void parseMsg(){
@@ -218,6 +272,33 @@ void parseMsg(){
   data_con.accelator = buffer[7] - '0';
   data_con.brake = buffer[8] - '0';
   data_con.gear = buffer[9] - '0';
+  media.status = buffer[10] - '0';
+
+  memset(media.singerName, 0x00, 32);
+  memset(media.songName, 0x00, 64);
+  int hd = 12;
+  int tl = getDeliIdx(hd);
+  for(int i=hd; i<=tl; i++) media.singerName[i-hd] = buffer[i];
+  media.singerName[tl+1] = '|';
+  hd = tl + 2;
+  tl = getDeliIdx(hd);
+  for(int i=hd; i<=tl; i++) media.songName[i-hd] = buffer[i];
+  media.songName[tl+1] = '|';
+
+  printf("\n%d\n",media.status);
+  printf("%s\n",media.singerName);
+  printf("%s\n",media.songName);
+}
+
+int getDeliIdx(int hd){
+  int tl;
+  for(int i=hd; i<BUF_LEN; i++){
+    if(buffer[i] == '|') {
+      tl=i;
+      break;
+    }
+  }
+  return tl;
 }
 
 void initStatus(){
@@ -240,6 +321,14 @@ void initStatus(){
   trip_info.instSpeed = 0;
   trip_info.avgSpeed = 0;
   trip_info.driveTime = 0;
+
+  // 미디어 초기화
+  memset(media.singerName, 0x00, 32);
+  memset(media.songName, 0x00, 64);
+  media.status = 0;
+  media.totalPlaytime = 0;
+  media.currentPlaytime = 0;
+  media.volume = 0;
 }
 
 void printDataLog(){
@@ -281,7 +370,7 @@ void updateEngStat(){
 
   /*
    * accelator : 0/1/2/3 , brake : 0/1/2/3
-   * 가속도 : (0.25 * 엑셀) - (0.25 * 브레이크)
+   * 가속도 : (0.25 * 엑셀) - (1.00 * 브레이크)
    * 속도 : 현재 속도 + 가속도
    * 엑셀과 브레이크가 모두 0일 경우, 속도는 매 초당 -3km/h로 감속
    * 최대속도(260km/h)에서 가속하거나 최저속도(0km/h)에서 감속할 경우 현상유지
@@ -300,10 +389,10 @@ void updateEngStat(){
    * 연비는 km/h로 계산되어 km/sec(1/20초)로 변환하기 위해 60 * 60 / 20으로 나눔
    */
   if(eng_stat.velocity == 0 || trip_info.fuelEconomy == 0) return;
-  if(eng_stat.fuel - 0.05 * (eng_stat.velocity / (float)(3600 * trip_info.fuelEconomy)) < 0) {
+  if(eng_stat.fuel - (eng_stat.velocity / (float)(3600 * trip_info.fuelEconomy)) < 0) {
     eng_stat.fuel = 0;
     // TODO: 연료 소진 알람 및 속도 제어로직 추가하기
-  } else eng_stat.fuel -= 0.05 * (float)eng_stat.velocity / (float)(3600 * trip_info.fuelEconomy);
+  } else eng_stat.fuel -= (float)eng_stat.velocity / (float)(3600 * trip_info.fuelEconomy);
 }
 
 void updateTripInfo(){
