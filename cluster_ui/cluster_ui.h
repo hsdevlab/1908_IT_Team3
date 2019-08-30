@@ -36,6 +36,7 @@ private:
     QPixmap *mediaStatIcon;
     QPixmap *musicIcon;
     QTcpSocket *socket;
+
     QString turnLeftSignal = "off";
     QString turnRightSignal = "off";
     QString speedSignal = "0.0";

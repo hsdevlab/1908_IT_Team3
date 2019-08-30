@@ -7,7 +7,7 @@ Cluster_UI::Cluster_UI(QWidget *parent) :
 {
     ui->setupUi(this);
     socket = new QTcpSocket(this);
-    socket->connectToHost("192.168.100.147", 6060);
+    socket->connectToHost("192.168.100.147", 5050);
     connect(socket, SIGNAL(readyRead()), this, SLOT(getData()));
 
     QTimer *timer = new QTimer(this);
@@ -15,7 +15,7 @@ Cluster_UI::Cluster_UI(QWidget *parent) :
     timer->start(50);
 
     QPalette pal = palette();
-    pal.setColor(QPalette::Background, QColor(1, 2, 20));
+    pal.setColor(QPalette::Background, QColor(1, 15, 30));
     this->setAutoFillBackground(true);
     this->setPalette(pal);
     setWindowTitle(tr("Cluster UI"));
@@ -105,13 +105,13 @@ void Cluster_UI::paintEvent(QPaintEvent *){
     painter.setFont(defaultFont);
     painter.drawText(kmh, Qt::AlignCenter, "km/h");
     painter.setFont(musicFont);
-    painter.drawText(total_text, Qt::AlignCenter, "총 주행");
-    painter.drawText(current_text, Qt::AlignCenter, "현재 주행");
+    painter.drawText(total_text, Qt::AlignCenter, "주행 거리");
+    painter.drawText(current_text, Qt::AlignCenter, "주행 시간");
     painter.setFont(speedFont);
     painter.setPen(meterColor);
 
     painter.drawText(speed_lcd, Qt::AlignCenter, QString("%1").arg((int)speedValue));
-    painter.drawText(current_mileage_lcd, Qt::AlignCenter, currentMileageSignal + "km");
+    painter.drawText(current_mileage_lcd, Qt::AlignCenter, currentMileageSignal + "sec");
     painter.drawText(total_mileage_lcd, Qt::AlignCenter, totalMileageSignal + "km");
     painter.drawText(current_time, Qt::AlignCenter, currTime.toString(time_format));    
     painter.save();
@@ -275,7 +275,7 @@ void Cluster_UI::paintEvent(QPaintEvent *){
 
     //깜빡이
     if(turnLeftSignal == "on"){
-        if(left_blinkCount % 50 < 25){
+        if(left_blinkCount % 25 < 12){
             left_on = false;
             if(!turn_left->load(":images/turn_left_off.png")) {
                 qDebug() << "이미지 불러오기 에러:turn_left_off.png";
@@ -296,7 +296,7 @@ void Cluster_UI::paintEvent(QPaintEvent *){
     }
 
     if(turnRightSignal == "on"){
-        if(right_blinkCount % 50 < 25){
+        if(right_blinkCount % 25 < 12){
             right_on = false;
             if(!turn_right->load(":images/turn_right_off.png")) {
                 qDebug() << "이미지 불러오기 에러:turn_right_off.png";
@@ -375,12 +375,12 @@ void Cluster_UI::getData(){
             gearSignal = data[5]; //0123: PRND
             speedSignal = data[6];
             fuelSignal = data[8];
-            currentMileageSignal = data[9];
             totalMileageSignal = data[9];
+            currentMileageSignal = data[10];
             fuelEconomySignal = data[11];
-            singerNameSignal = data[14];
-            songNameSignal = data[15];
-            mediaStatSignal = data[16] == "1" ? "on" : "off";
+            mediaStatSignal = data[14] == "1" ? "on" : "off";
+            singerNameSignal = data[15];
+            songNameSignal = data[16];
             totalPlayTimeSignal = data[17];
             currPlayTimeSignal = data[18];
         }
@@ -407,9 +407,9 @@ void Cluster_UI::getData(){
             currentMileageSignal = "0.0";
             totalMileageSignal = "0.0";
             fuelEconomySignal = "0.0";
+            mediaStatSignal = "off";
             singerNameSignal = "-";
             songNameSignal = "Untitled";
-            mediaStatSignal = "off";
             totalPlayTimeSignal = "1";
             currPlayTimeSignal = "0";
         }
